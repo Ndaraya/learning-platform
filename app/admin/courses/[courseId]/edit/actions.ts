@@ -1,0 +1,162 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+// ── Modules ──────────────────────────────────────────────────
+
+export async function addModule(courseId: string, title: string, description: string) {
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('modules')
+    .select('order')
+    .eq('course_id', courseId)
+    .order('order', { ascending: false })
+    .limit(1)
+    .single()
+
+  const nextOrder = (existing?.order ?? -1) + 1
+
+  const { error } = await supabase
+    .from('modules')
+    .insert({ course_id: courseId, title, description: description || null, order: nextOrder })
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function deleteModule(courseId: string, moduleId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('modules').delete().eq('id', moduleId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+// ── Lessons ──────────────────────────────────────────────────
+
+export async function addLesson(
+  courseId: string,
+  moduleId: string,
+  title: string,
+  description: string,
+  youtubeUrl: string
+) {
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('lessons')
+    .select('order')
+    .eq('module_id', moduleId)
+    .order('order', { ascending: false })
+    .limit(1)
+    .single()
+
+  const nextOrder = (existing?.order ?? -1) + 1
+
+  const { error } = await supabase.from('lessons').insert({
+    module_id: moduleId,
+    title,
+    description: description || null,
+    youtube_url: youtubeUrl,
+    order: nextOrder,
+  })
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function deleteLesson(courseId: string, lessonId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('lessons').delete().eq('id', lessonId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+// ── Tasks ────────────────────────────────────────────────────
+
+export async function addTask(
+  courseId: string,
+  lessonId: string,
+  title: string,
+  type: 'quiz' | 'written',
+  instructions: string
+) {
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('tasks')
+    .select('order')
+    .eq('lesson_id', lessonId)
+    .order('order', { ascending: false })
+    .limit(1)
+    .single()
+
+  const nextOrder = (existing?.order ?? -1) + 1
+
+  const { error } = await supabase.from('tasks').insert({
+    lesson_id: lessonId,
+    title,
+    type,
+    instructions: instructions || null,
+    order: nextOrder,
+  })
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function deleteTask(courseId: string, taskId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('tasks').delete().eq('id', taskId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+// ── Questions ────────────────────────────────────────────────
+
+export async function addQuestion(
+  courseId: string,
+  taskId: string,
+  prompt: string,
+  type: 'mcq' | 'written',
+  options: string[],
+  correctAnswer: string,
+  points: number,
+  gradingRubric: string
+) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('questions').insert({
+    task_id: taskId,
+    prompt,
+    type,
+    options: type === 'mcq' && options.length > 0 ? options : null,
+    correct_answer: type === 'mcq' ? correctAnswer : null,
+    points,
+    grading_rubric: type === 'written' ? gradingRubric || null : null,
+  })
+
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function deleteQuestion(courseId: string, questionId: string) {
+  const supabase = await createClient()
+  const { error } = await supabase.from('questions').delete().eq('id', questionId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+// ── Publish toggle ───────────────────────────────────────────
+
+export async function togglePublish(courseId: string, published: boolean) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update({ published })
+    .eq('id', courseId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+  revalidatePath('/admin/courses')
+}
