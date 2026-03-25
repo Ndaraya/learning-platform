@@ -22,6 +22,9 @@ export default async function OrgAdminLayout({ children }: { children: React.Rea
           <div className="flex items-center gap-4">
             <Link href="/org-admin/dashboard" className="text-sm hover:underline underline-offset-4">Dashboard</Link>
             <Link href="/org-admin/students" className="text-sm hover:underline underline-offset-4">Students</Link>
+            <form action="/api/auth/signout" method="post">
+              <button type="submit" className="text-sm hover:underline underline-offset-4">Sign out</button>
+            </form>
           </div>
         </nav>
       </header>

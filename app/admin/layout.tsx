@@ -40,6 +40,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   <Link href="/super-admin/organizations" className="text-sm hover:underline underline-offset-4">Super Admin</Link>
                 </li>
               )}
+              <li>
+                <form action="/api/auth/signout" method="post">
+                  <button type="submit" className="text-sm hover:underline underline-offset-4">Sign out</button>
+                </form>
+              </li>
             </ul>
           </nav>
         </div>

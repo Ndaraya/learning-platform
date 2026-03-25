@@ -23,6 +23,9 @@ export default async function SuperAdminLayout({ children }: { children: React.R
             <Link href="/super-admin/users" className="text-sm hover:underline underline-offset-4">Users</Link>
             <Link href="/super-admin/billing" className="text-sm hover:underline underline-offset-4">Billing</Link>
             <Link href="/admin/dashboard" className="text-sm hover:underline underline-offset-4">Admin</Link>
+            <form action="/api/auth/signout" method="post">
+              <button type="submit" className="text-sm hover:underline underline-offset-4">Sign out</button>
+            </form>
           </div>
         </nav>
       </header>
