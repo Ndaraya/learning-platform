@@ -40,6 +40,21 @@ export default async function CourseDetailPage({ params }: Props) {
 
   const firstLesson = modules[0]?.lessons?.sort((a, b) => a.order - b.order)[0]
 
+  // Check completion for certificate link
+  let isComplete = false
+  if (enrollment) {
+    const allLessonIds = modules.flatMap((m) => m.lessons.map((l) => l.id))
+    if (allLessonIds.length > 0) {
+      const { data: completedLessons } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id')
+        .eq('user_id', user.id)
+        .eq('completed', true)
+        .in('lesson_id', allLessonIds)
+      isComplete = (completedLessons ?? []).length >= allLessonIds.length
+    }
+  }
+
   return (
     <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
       {/* Left sidebar */}
@@ -91,9 +106,21 @@ export default async function CourseDetailPage({ params }: Props) {
           <div className="absolute right-8 top-8 bg-white rounded-xl shadow-lg p-5 w-56 z-10">
             {enrollment ? (
               <>
-                <p className="font-semibold text-sm text-gray-900">You&apos;re enrolled!</p>
-                <p className="text-xs text-gray-500 mt-1">Keep going with your tasks.</p>
-                {firstLesson && (
+                <p className="font-semibold text-sm text-gray-900">
+                  {isComplete ? '🎉 Course complete!' : "You're enrolled!"}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isComplete ? 'Your certificate is ready.' : 'Keep going with your tasks.'}
+                </p>
+                {isComplete ? (
+                  <Link
+                    href={`/courses/${courseId}/certificate`}
+                    className="mt-3 block w-full rounded-lg py-2 px-4 text-sm font-semibold text-white text-center transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: 'var(--brand)' }}
+                  >
+                    View Certificate →
+                  </Link>
+                ) : firstLesson && (
                   <Link
                     href={`/courses/${courseId}/lessons/${firstLesson.id}`}
                     className="mt-3 block w-full rounded-lg py-2 px-4 text-sm font-semibold text-white text-center transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"

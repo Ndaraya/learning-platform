@@ -107,7 +107,7 @@ export default async function StudentDashboardPage() {
               return (
                 <Link
                   key={enrollment.id}
-                  href={`/courses/${enrollment.course_id}`}
+                  href={done ? `/courses/${enrollment.course_id}/certificate` : `/courses/${enrollment.course_id}`}
                   className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
                   role="listitem"
                   aria-label={`${course?.title} — ${done ? 'Completed' : `${progress}% complete`}`}
@@ -134,6 +134,11 @@ export default async function StudentDashboardPage() {
                         </div>
                         <Progress value={progress} aria-hidden="true" />
                       </div>
+                      {done && (
+                        <p className="mt-2 text-xs font-medium" style={{ color: 'var(--brand)' }}>
+                          Certificate available →
+                        </p>
+                      )}
                     </CardContent>
                   </Card>
                 </Link>
