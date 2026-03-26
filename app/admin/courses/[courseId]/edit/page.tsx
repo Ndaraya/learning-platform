@@ -7,6 +7,10 @@ import { AddModuleDialog } from '@/components/admin/AddModuleDialog'
 import { AddLessonDialog } from '@/components/admin/AddLessonDialog'
 import { AddTaskDialog } from '@/components/admin/AddTaskDialog'
 import { AddQuestionDialog } from '@/components/admin/AddQuestionDialog'
+import { EditModuleDialog } from '@/components/admin/EditModuleDialog'
+import { EditLessonDialog } from '@/components/admin/EditLessonDialog'
+import { EditTaskDialog } from '@/components/admin/EditTaskDialog'
+import { EditQuestionDialog } from '@/components/admin/EditQuestionDialog'
 import { PublishToggle } from '@/components/admin/PublishToggle'
 import { DeleteButton } from '@/components/admin/DeleteButton'
 import { deleteModule, deleteLesson, deleteTask, deleteQuestion } from './actions'
@@ -122,10 +126,18 @@ export default async function EditCoursePage({ params }: Props) {
                       <CardTitle className="text-base">
                         Module {moduleIndex + 1}: {module.title}
                       </CardTitle>
-                      <DeleteButton
-                        label={module.title}
-                        onDelete={deleteModule.bind(null, courseId, module.id)}
-                      />
+                      <div className="flex items-center gap-1 shrink-0">
+                        <EditModuleDialog
+                          courseId={courseId}
+                          moduleId={module.id}
+                          initialTitle={module.title}
+                          initialDescription={module.description}
+                        />
+                        <DeleteButton
+                          label={module.title}
+                          onDelete={deleteModule.bind(null, courseId, module.id)}
+                        />
+                      </div>
                     </div>
                     {module.description && (
                       <p className="text-sm text-muted-foreground">{module.description}</p>
@@ -162,7 +174,14 @@ export default async function EditCoursePage({ params }: Props) {
                                     {lesson.youtube_url}
                                   </a>
                                 </div>
-                                <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <EditLessonDialog
+                                    courseId={courseId}
+                                    lessonId={lesson.id}
+                                    initialTitle={lesson.title}
+                                    initialDescription={lesson.description}
+                                    initialYoutubeUrl={lesson.youtube_url}
+                                  />
                                   <AddTaskDialog courseId={courseId} lessonId={lesson.id} />
                                   <DeleteButton
                                     label={lesson.title}
@@ -187,7 +206,13 @@ export default async function EditCoursePage({ params }: Props) {
                                               {task.type}
                                             </Badge>
                                           </div>
-                                          <div className="flex items-center gap-3">
+                                          <div className="flex items-center gap-1">
+                                            <EditTaskDialog
+                                              courseId={courseId}
+                                              taskId={task.id}
+                                              initialTitle={task.title}
+                                              initialInstructions={task.instructions}
+                                            />
                                             <AddQuestionDialog
                                               courseId={courseId}
                                               taskId={task.id}
@@ -212,10 +237,22 @@ export default async function EditCoursePage({ params }: Props) {
                                                     ({q.points}pt · {q.type === 'mcq' ? 'MCQ' : 'written'})
                                                   </span>
                                                 </span>
-                                                <DeleteButton
-                                                  label={`Question ${qi + 1}`}
-                                                  onDelete={deleteQuestion.bind(null, courseId, q.id)}
-                                                />
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                  <EditQuestionDialog
+                                                    courseId={courseId}
+                                                    questionId={q.id}
+                                                    initialPrompt={q.prompt}
+                                                    initialType={q.type}
+                                                    initialOptions={q.options}
+                                                    initialCorrectAnswer={q.correct_answer}
+                                                    initialPoints={q.points}
+                                                    initialRubric={q.grading_rubric}
+                                                  />
+                                                  <DeleteButton
+                                                    label={`Question ${qi + 1}`}
+                                                    onDelete={deleteQuestion.bind(null, courseId, q.id)}
+                                                  />
+                                                </div>
                                               </li>
                                             ))}
                                           </ol>

@@ -148,6 +148,76 @@ export async function deleteQuestion(courseId: string, questionId: string) {
   revalidatePath(`/admin/courses/${courseId}/edit`)
 }
 
+// ── Update actions ───────────────────────────────────────────
+
+export async function updateCourse(courseId: string, title: string, description: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('courses')
+    .update({ title, description: description || null })
+    .eq('id', courseId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+  revalidatePath('/admin/courses')
+}
+
+export async function updateModule(courseId: string, moduleId: string, title: string, description: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('modules')
+    .update({ title, description: description || null })
+    .eq('id', moduleId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function updateLesson(
+  courseId: string, lessonId: string,
+  title: string, description: string, youtubeUrl: string
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('lessons')
+    .update({ title, description: description || null, youtube_url: youtubeUrl })
+    .eq('id', lessonId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function updateTask(
+  courseId: string, taskId: string,
+  title: string, instructions: string
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('tasks')
+    .update({ title, instructions: instructions || null })
+    .eq('id', taskId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
+export async function updateQuestion(
+  courseId: string, questionId: string,
+  prompt: string, type: 'mcq' | 'written',
+  options: string[], correctAnswer: string,
+  points: number, gradingRubric: string
+) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('questions')
+    .update({
+      prompt, type,
+      options: type === 'mcq' && options.length > 0 ? options : null,
+      correct_answer: type === 'mcq' ? correctAnswer : null,
+      points,
+      grading_rubric: type === 'written' ? gradingRubric || null : null,
+    })
+    .eq('id', questionId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/admin/courses/${courseId}/edit`)
+}
+
 // ── Publish toggle ───────────────────────────────────────────
 
 export async function togglePublish(courseId: string, published: boolean) {
