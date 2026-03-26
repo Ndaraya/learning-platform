@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { gradeWrittenResponse } from '@/lib/claude/grader'
+import { sendTaskFeedbackEmail, sendCourseCompletionEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,13 +95,30 @@ export async function POST(request: NextRequest) {
       .update({ score: scorePercent, graded_at: new Date().toISOString() })
       .eq('id', submission.id)
 
-    // Mark lesson complete if all tasks for this lesson have been submitted
+    // Fetch user email + name for emails
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single()
+    const userName = profile?.display_name ?? user.email?.split('@')[0] ?? 'there'
+
+    // Fetch task title + lesson_id for emails
     const { data: taskRow } = await supabase
       .from('tasks')
-      .select('lesson_id')
+      .select('title, lesson_id')
       .eq('id', taskId)
       .single()
 
+    // Send task feedback email (fire-and-forget)
+    if (user.email && taskRow) {
+      sendTaskFeedbackEmail(
+        user.email, userName, taskRow.title, scorePercent,
+        '', taskRow.lesson_id ?? '', taskId
+      ).catch(() => {})
+    }
+
+    // Mark lesson complete if all tasks for this lesson have been submitted
     if (taskRow?.lesson_id) {
       const lessonId = taskRow.lesson_id
 
@@ -119,7 +137,6 @@ export async function POST(request: NextRequest) {
         .not('graded_at', 'is', null)
 
       const completedTaskIds = new Set((completedSubmissions ?? []).map((s) => s.task_id))
-      // Include the task we just graded
       completedTaskIds.add(taskId)
 
       if (allTaskIds.every((id) => completedTaskIds.has(id))) {
@@ -129,6 +146,42 @@ export async function POST(request: NextRequest) {
             { user_id: user.id, lesson_id: lessonId, completed: true, completed_at: new Date().toISOString() },
             { onConflict: 'user_id,lesson_id' }
           )
+
+        // Check if all lessons in the course are now complete → send completion email
+        const { data: moduleRow } = await supabase
+          .from('lessons')
+          .select('modules!inner(course_id, courses(title))')
+          .eq('id', lessonId)
+          .single()
+
+        const mod = Array.isArray(moduleRow?.modules) ? moduleRow.modules[0] : moduleRow?.modules
+        const courseId = (mod as { course_id: string } | null)?.course_id
+        const courseTitle = (mod as { courses: { title: string } | null } | null)?.courses?.title
+
+        if (courseId && courseTitle) {
+          const { data: allCourseLessons } = await supabase
+            .from('lessons')
+            .select('id, modules!inner(course_id)')
+            .eq('modules.course_id', courseId)
+
+          const allLessonIds = (allCourseLessons ?? []).map((l) => l.id)
+
+          const { data: allCompleted } = await supabase
+            .from('lesson_progress')
+            .select('lesson_id')
+            .eq('user_id', user.id)
+            .eq('completed', true)
+            .in('lesson_id', allLessonIds)
+
+          const doneIds = new Set((allCompleted ?? []).map((l) => l.lesson_id))
+          doneIds.add(lessonId)
+
+          if (allLessonIds.length > 0 && allLessonIds.every((id) => doneIds.has(id))) {
+            if (user.email) {
+              sendCourseCompletionEmail(user.email, userName, courseTitle, courseId).catch(() => {})
+            }
+          }
+        }
       }
     }
 
