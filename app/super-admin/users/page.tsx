@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { EditUserDialog } from '@/components/admin/EditUserDialog'
 import type { UserRole } from '@/lib/supabase/types'
 
 const ROLE_VARIANTS: Record<UserRole, 'default' | 'secondary' | 'outline'> = {
@@ -9,9 +10,19 @@ const ROLE_VARIANTS: Record<UserRole, 'default' | 'secondary' | 'outline'> = {
 
 export default async function UsersPage() {
   const supabase = await createClient()
-  const { data: users } = await supabase
-    .from('profiles').select('id, display_name, email, role, created_at, organizations(name)')
-    .order('created_at', { ascending: false })
+
+  const [{ data: users }, { data: orgs }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, display_name, email, role, org_id, created_at, organizations(name)')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('organizations')
+      .select('id, name')
+      .order('name'),
+  ])
+
+  const organizations = (orgs ?? []) as Array<{ id: string; name: string }>
 
   return (
     <div className="space-y-6">
@@ -21,7 +32,12 @@ export default async function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead><TableHead>Email</TableHead><TableHead>Role</TableHead><TableHead>Organization</TableHead><TableHead>Joined</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Organization</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead className="sr-only">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -32,9 +48,24 @@ export default async function UsersPage() {
                   <TableRow key={u.id}>
                     <TableCell className="font-medium">{u.display_name ?? '—'}</TableCell>
                     <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                    <TableCell><Badge variant={ROLE_VARIANTS[role]} className="capitalize">{role.replace('_', ' ')}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant={ROLE_VARIANTS[role]} className="capitalize">
+                        {role.replace('_', ' ')}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-muted-foreground text-sm">{org?.name ?? '—'}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{new Date(u.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {new Date(u.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <EditUserDialog
+                        userId={u.id}
+                        userName={u.display_name ?? u.email}
+                        currentRole={role}
+                        currentOrgId={u.org_id ?? null}
+                        organizations={organizations}
+                      />
+                    </TableCell>
                   </TableRow>
                 )
               })}
