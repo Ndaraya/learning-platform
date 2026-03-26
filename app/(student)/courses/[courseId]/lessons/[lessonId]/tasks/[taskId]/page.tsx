@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { TaskRunner } from '@/components/student/TaskRunner'
-import { CourseSidebar } from '@/components/student/CourseSidebar'
+import { LessonTaskSidebar } from '@/components/student/LessonTaskSidebar'
 
 interface Props {
   params: Promise<{ courseId: string; lessonId: string; taskId: string }>
@@ -24,7 +24,7 @@ export default async function TaskPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: task }, { data: lessonTasks }, { data: courseModules }] = await Promise.all([
+  const [{ data: task }, { data: lessonTasksData }, { data: lesson }] = await Promise.all([
     supabase
       .from('tasks')
       .select('id, title, type, instructions, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points)')
@@ -32,37 +32,43 @@ export default async function TaskPage({ params }: Props) {
       .single(),
     supabase
       .from('tasks')
-      .select('id, order')
+      .select('id, title, instructions, order, time_limit_seconds')
       .eq('lesson_id', lessonId)
       .order('order'),
     supabase
-      .from('modules')
-      .select('id, title, order, lessons(id, title, order)')
-      .eq('course_id', courseId)
-      .order('order'),
+      .from('lessons')
+      .select('id, title')
+      .eq('id', lessonId)
+      .single(),
   ])
 
   if (!task) notFound()
 
-  const { data: existingSubmission } = await supabase
-    .from('task_submissions')
-    .select('id, score, graded_at, question_responses(question_id, answer, score, max_score, feedback, ai_graded)')
-    .eq('user_id', user.id)
-    .eq('task_id', taskId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
+  const sortedLessonTasks = [...(lessonTasksData ?? [])].sort((a, b) => a.order - b.order)
+  const taskIds = sortedLessonTasks.map((t) => t.id)
+
+  const [{ data: existingSubmission }, { data: allSubmissions }] = await Promise.all([
+    supabase
+      .from('task_submissions')
+      .select('id, score, graded_at, question_responses(question_id, answer, score, max_score, feedback, ai_graded)')
+      .eq('user_id', user.id)
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single(),
+    supabase
+      .from('task_submissions')
+      .select('task_id')
+      .eq('user_id', user.id)
+      .in('task_id', taskIds),
+  ])
+
+  const submittedTaskIds = (allSubmissions ?? []).map((s) => s.task_id as string)
 
   const questions = task.questions as Array<{
     id: string; prompt: string; type: 'mcq' | 'written'; options: string[] | null; points: number
   }>
 
-  const modules = (courseModules ?? []) as Array<{
-    id: string; title: string; order: number
-    lessons: Array<{ id: string; title: string; order: number }>
-  }>
-
-  const sortedLessonTasks = [...(lessonTasks ?? [])].sort((a, b) => a.order - b.order)
   const taskIndex = sortedLessonTasks.findIndex((t) => t.id === taskId)
 
   // Step 1 = lesson overview, steps 2+ = tasks
@@ -71,10 +77,18 @@ export default async function TaskPage({ params }: Props) {
 
   const prevTaskId = taskIndex > 0 ? sortedLessonTasks[taskIndex - 1]?.id : null
   const nextTaskId = taskIndex < sortedLessonTasks.length - 1 ? sortedLessonTasks[taskIndex + 1]?.id : null
+  const isCurrentTaskSubmitted = submittedTaskIds.includes(taskId)
 
   return (
     <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
-      <CourseSidebar courseId={courseId} modules={modules} currentLessonId={lessonId} />
+      <LessonTaskSidebar
+        courseId={courseId}
+        lessonId={lessonId}
+        lessonTitle={lesson?.title ?? 'Lesson'}
+        tasks={sortedLessonTasks as Array<{ id: string; title: string; instructions: string | null; order: number; time_limit_seconds: number | null }>}
+        currentTaskId={taskId}
+        submittedTaskIds={submittedTaskIds}
+      />
 
       <div className="flex-1 overflow-y-auto">
         {/* Top bar: task title + step pagination */}
@@ -128,7 +142,7 @@ export default async function TaskPage({ params }: Props) {
             timedMode={((task as { timed_mode?: string }).timed_mode ?? 'untimed') as 'untimed' | 'practice' | 'exam'}
           />
 
-          {/* Back / Next navigation (shown before submission) */}
+          {/* Back / Next navigation */}
           <div className="flex items-center justify-between pt-4 border-t">
             {prevTaskId ? (
               <Link
@@ -147,13 +161,24 @@ export default async function TaskPage({ params }: Props) {
             )}
 
             {nextTaskId && (
-              <Link
-                href={`/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`}
-                className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: 'var(--brand)' }}
-              >
-                Next →
-              </Link>
+              isCurrentTaskSubmitted ? (
+                <Link
+                  href={`/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`}
+                  className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: 'var(--brand)' }}
+                >
+                  Next →
+                </Link>
+              ) : (
+                <span
+                  className="rounded-lg px-5 py-2 text-sm font-semibold text-white cursor-not-allowed opacity-40"
+                  style={{ backgroundColor: 'var(--brand)' }}
+                  title="Submit this task to continue"
+                  aria-disabled="true"
+                >
+                  Next →
+                </span>
+              )
             )}
           </div>
         </div>
