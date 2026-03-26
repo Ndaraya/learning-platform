@@ -155,8 +155,8 @@ export async function POST(request: NextRequest) {
           .single()
 
         const mod = Array.isArray(moduleRow?.modules) ? moduleRow.modules[0] : moduleRow?.modules
-        const courseId = (mod as { course_id: string } | null)?.course_id
-        const courseTitle = (mod as { courses: { title: string } | null } | null)?.courses?.title
+        const courseId = (mod as unknown as { course_id: string } | null)?.course_id
+        const courseTitle = (mod as unknown as { courses: { title: string } | null } | null)?.courses?.title
 
         if (courseId && courseTitle) {
           const { data: allCourseLessons } = await supabase
