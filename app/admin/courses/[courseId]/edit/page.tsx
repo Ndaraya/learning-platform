@@ -7,6 +7,7 @@ import { AddModuleDialog } from '@/components/admin/AddModuleDialog'
 import { AddLessonDialog } from '@/components/admin/AddLessonDialog'
 import { AddTaskDialog } from '@/components/admin/AddTaskDialog'
 import { AddQuestionDialog } from '@/components/admin/AddQuestionDialog'
+import { EditCourseDialog } from '@/components/admin/EditCourseDialog'
 import { EditModuleDialog } from '@/components/admin/EditModuleDialog'
 import { EditLessonDialog } from '@/components/admin/EditLessonDialog'
 import { EditTaskDialog } from '@/components/admin/EditTaskDialog'
@@ -97,6 +98,11 @@ export default async function EditCoursePage({ params }: Props) {
           <Badge variant={course.published ? 'default' : 'secondary'}>
             {course.published ? 'Published' : 'Draft'}
           </Badge>
+          <EditCourseDialog
+            courseId={courseId}
+            initialTitle={course.title}
+            initialDescription={course.description}
+          />
           <PublishToggle courseId={courseId} published={course.published} />
         </div>
       </div>
