@@ -6,7 +6,12 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { ScoreProjectionWidget } from '@/components/student/ScoreProjectionWidget'
 
-export default async function StudentDashboardPage() {
+interface Props {
+  searchParams: Promise<{ upgraded?: string }>
+}
+
+export default async function StudentDashboardPage({ searchParams }: Props) {
+  const { upgraded } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -64,6 +69,17 @@ export default async function StudentDashboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
     <div className="space-y-10">
+      {upgraded === 'true' && (
+        <div
+          className="rounded-xl p-4 text-white text-sm font-medium flex items-center gap-3"
+          style={{ backgroundColor: 'var(--brand)' }}
+          role="status"
+          aria-live="polite"
+        >
+          <span aria-hidden="true">🎉</span>
+          <span>You&apos;re now on Pro — all courses and AI feedback are unlocked.</span>
+        </div>
+      )}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Welcome back, {name}</h1>
         <p className="text-muted-foreground mt-1">Here&apos;s where you stand.</p>
