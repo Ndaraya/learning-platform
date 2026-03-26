@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,6 +39,8 @@ interface Props {
   lessonId: string
   questions: Question[]
   existingSubmission: ExistingSubmission | null
+  timeLimitSeconds: number | null
+  timedMode: 'untimed' | 'practice' | 'exam'
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -46,7 +48,6 @@ function ScoreRing({ score }: { score: number }) {
     score >= 80 ? 'text-green-600' :
     score >= 60 ? 'text-yellow-600' :
     'text-red-600'
-
   return (
     <div className={`text-5xl font-bold tabular-nums ${color}`} aria-label={`Score: ${score} out of 100`}>
       {score}<span className="text-2xl text-muted-foreground">%</span>
@@ -54,10 +55,20 @@ function ScoreRing({ score }: { score: number }) {
   )
 }
 
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+const STORAGE_KEY = (taskId: string) => `lp-task-start-${taskId}`
+
 export function TaskRunner({
-  taskId, courseId, lessonId, questions, existingSubmission
+  taskId, courseId, lessonId, questions, existingSubmission,
+  timeLimitSeconds, timedMode,
 }: Props) {
   const router = useRouter()
+
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (!existingSubmission) return {}
     return Object.fromEntries(
@@ -68,15 +79,63 @@ export function TaskRunner({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const answered = questions.filter((q) => answers[q.id]?.trim()).length
-  const allAnswered = answered === questions.length
-  const hasResults = submission !== null
+  // Timer state
+  const [timerEnabled, setTimerEnabled] = useState(timedMode === 'exam')
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [timeExpired, setTimeExpired] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const hasSubmitted = useRef(false)
 
-  function setAnswer(questionId: string, value: string) {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }))
-  }
+  const shouldShowTimer = timeLimitSeconds !== null && timedMode !== 'untimed' && timerEnabled
 
-  async function handleSubmit() {
+  // Initialize timer from localStorage or fresh
+  useEffect(() => {
+    if (!timeLimitSeconds || timedMode === 'untimed' || !timerEnabled || submission) return
+
+    const key = STORAGE_KEY(taskId)
+    const stored = localStorage.getItem(key)
+    let startTime: number
+
+    if (stored) {
+      startTime = parseInt(stored)
+    } else {
+      startTime = Date.now()
+      localStorage.setItem(key, String(startTime))
+    }
+
+    const elapsed = Math.floor((Date.now() - startTime) / 1000)
+    const remaining = timeLimitSeconds - elapsed
+
+    if (remaining <= 0) {
+      setTimeLeft(0)
+      setTimeExpired(true)
+    } else {
+      setTimeLeft(remaining)
+    }
+  }, [taskId, timeLimitSeconds, timedMode, timerEnabled, submission])
+
+  // Countdown interval
+  useEffect(() => {
+    if (!shouldShowTimer || timeLeft === null || submission) return
+
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(intervalRef.current!)
+          setTimeExpired(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(intervalRef.current!)
+  }, [shouldShowTimer, timeLeft, submission])
+
+  // Auto-submit when exam timer expires
+  const handleSubmit = useCallback(async (isAutoSubmit = false) => {
+    if (hasSubmitted.current) return
+    hasSubmitted.current = true
     setLoading(true)
     setError(null)
 
@@ -98,10 +157,9 @@ export function TaskRunner({
         throw new Error(data.error ?? 'Submission failed')
       }
 
-      // Reload to pick up the saved submission + responses from the server
+      localStorage.removeItem(STORAGE_KEY(taskId))
       router.refresh()
 
-      // Optimistically show score from response
       const { submissionId, score } = await res.json()
       setSubmission({
         id: submissionId,
@@ -117,13 +175,42 @@ export function TaskRunner({
         })),
       })
     } catch (err) {
+      hasSubmitted.current = false
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
+  }, [taskId, questions, answers, router])
+
+  useEffect(() => {
+    if (timeExpired && timedMode === 'exam' && !submission && !hasSubmitted.current) {
+      handleSubmit(true)
+    }
+  }, [timeExpired, timedMode, submission, handleSubmit])
+
+  const answered = questions.filter((q) => answers[q.id]?.trim()).length
+  const allAnswered = answered === questions.length
+  const hasResults = submission !== null
+
+  function setAnswer(questionId: string, value: string) {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
-  // ── Results view ─────────────────────────────────────────
+  function handleEnableTimer() {
+    setTimerEnabled(true)
+    localStorage.setItem(STORAGE_KEY(taskId), String(Date.now()))
+    setTimeLeft(timeLimitSeconds!)
+  }
+
+  // Timer color
+  const timerColor =
+    timeLeft !== null && timeLimitSeconds !== null
+      ? timeLeft <= 60 ? 'text-red-600'
+      : timeLeft <= timeLimitSeconds * 0.2 ? 'text-yellow-600'
+      : 'text-green-700'
+      : 'text-green-700'
+
+  // ── Results view ─────────────────────────────────────────────
   if (hasResults && submission.graded_at) {
     const responseMap = Object.fromEntries(
       (submission.question_responses ?? []).map((r) => [r.question_id, r])
@@ -131,15 +218,10 @@ export function TaskRunner({
 
     return (
       <div className="space-y-6" role="region" aria-label="Task results">
-        {/* Score summary */}
         <Card>
           <CardContent className="pt-6 flex flex-col items-center gap-3 text-center">
             <ScoreRing score={submission.score ?? 0} />
-            <Progress
-              value={submission.score ?? 0}
-              className="w-48"
-              aria-label="Score progress bar"
-            />
+            <Progress value={submission.score ?? 0} className="w-48" aria-label="Score progress bar" />
             <p className="text-sm text-muted-foreground">
               {(submission.score ?? 0) >= 80
                 ? 'Great work! You passed this task.'
@@ -150,16 +232,13 @@ export function TaskRunner({
           </CardContent>
         </Card>
 
-        {/* Per-question breakdown */}
         <section aria-labelledby="results-heading">
           <h2 id="results-heading" className="text-lg font-semibold mb-3">Question breakdown</h2>
           <div className="space-y-4">
             {questions.map((q, i) => {
               const response = responseMap[q.id]
               const earned = response?.score ?? null
-              const scoreLabel = earned !== null
-                ? `${earned} / ${response.max_score} pts`
-                : 'Grading…'
+              const scoreLabel = earned !== null ? `${earned} / ${response.max_score} pts` : 'Grading…'
               const correct = earned !== null && earned >= response.max_score
 
               return (
@@ -169,11 +248,7 @@ export function TaskRunner({
                       <CardTitle className="text-sm font-medium leading-snug">
                         Q{i + 1}. {q.prompt}
                       </CardTitle>
-                      <Badge
-                        variant={correct ? 'default' : 'secondary'}
-                        className="shrink-0"
-                        aria-label={`Score: ${scoreLabel}`}
-                      >
+                      <Badge variant={correct ? 'default' : 'secondary'} className="shrink-0" aria-label={`Score: ${scoreLabel}`}>
                         {scoreLabel}
                       </Badge>
                     </div>
@@ -192,11 +267,7 @@ export function TaskRunner({
                       </div>
                     )}
                     {response?.feedback && q.type === 'written' && (
-                      <div
-                        className="mt-2 rounded-md bg-muted p-3 text-sm"
-                        role="note"
-                        aria-label="AI feedback"
-                      >
+                      <div className="mt-2 rounded-md bg-muted p-3 text-sm" role="note" aria-label="AI feedback">
                         <span className="font-medium">Feedback: </span>
                         {response.feedback}
                         {response.ai_graded && (
@@ -214,17 +285,21 @@ export function TaskRunner({
         <Separator />
 
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}
-          >
+          <Button variant="outline" onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}>
             Back to lesson
           </Button>
           <Button
             variant="ghost"
             onClick={() => {
+              hasSubmitted.current = false
               setSubmission(null)
               setAnswers({})
+              if (timeLimitSeconds && timedMode !== 'untimed') {
+                localStorage.removeItem(STORAGE_KEY(taskId))
+                setTimeLeft(timeLimitSeconds)
+                setTimeExpired(false)
+                setTimerEnabled(timedMode === 'exam')
+              }
             }}
           >
             Retake task
@@ -234,14 +309,75 @@ export function TaskRunner({
     )
   }
 
-  // ── Question form ─────────────────────────────────────────
+  // ── Question form ──────────────────────────────────────────
   return (
-    <form
-      onSubmit={(e) => { e.preventDefault(); handleSubmit() }}
-      noValidate
-      aria-label="Task questions"
-    >
+    <form onSubmit={(e) => { e.preventDefault(); handleSubmit() }} noValidate aria-label="Task questions">
       <div className="space-y-6">
+
+        {/* Timer bar */}
+        {timeLimitSeconds !== null && timedMode !== 'untimed' && (
+          <div className="rounded-xl border p-4 space-y-2">
+            {timerEnabled ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    {timedMode === 'exam' ? '⏱ Exam timer' : '⏱ Practice timer'}
+                  </span>
+                  <span
+                    className={`text-2xl font-bold tabular-nums ${timerColor}`}
+                    aria-live="polite"
+                    aria-label={`Time remaining: ${timeLeft !== null ? formatTime(timeLeft) : '—'}`}
+                  >
+                    {timeLeft !== null ? formatTime(timeLeft) : formatTime(timeLimitSeconds)}
+                  </span>
+                </div>
+                {timeLeft !== null && (
+                  <Progress
+                    value={(timeLeft / timeLimitSeconds) * 100}
+                    className="h-1.5"
+                    aria-hidden="true"
+                  />
+                )}
+                {timeLeft !== null && timeLeft <= timeLimitSeconds * 0.2 && timeLeft > 0 && (
+                  <p className="text-xs font-medium text-yellow-700" role="alert" aria-live="assertive">
+                    Less than 20% of time remaining — wrap up soon.
+                  </p>
+                )}
+                {timeExpired && (
+                  <p className="text-xs font-medium text-red-600" role="alert" aria-live="assertive">
+                    {timedMode === 'exam' ? 'Time is up — submitting your answers…' : 'Time is up.'}
+                  </p>
+                )}
+                {timedMode === 'practice' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTimerEnabled(false)
+                      clearInterval(intervalRef.current!)
+                      localStorage.removeItem(STORAGE_KEY(taskId))
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                  >
+                    Disable timer
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Timer available</p>
+                  <p className="text-xs text-muted-foreground">
+                    {Math.round(timeLimitSeconds / 60)} minutes · optional for practice mode
+                  </p>
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={handleEnableTimer}>
+                  Start timer
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Progress indicator */}
         <div className="flex items-center justify-between text-sm text-muted-foreground" aria-live="polite">
           <span>{answered} of {questions.length} answered</span>
@@ -312,9 +448,7 @@ export function TaskRunner({
           </Card>
         ))}
 
-        {error && (
-          <p role="alert" className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
         <div className="flex items-center justify-between">
           <Button
@@ -326,7 +460,7 @@ export function TaskRunner({
           </Button>
           <Button
             type="submit"
-            disabled={!allAnswered || loading}
+            disabled={!allAnswered || loading || (timedMode === 'exam' && timeExpired)}
             aria-busy={loading}
             aria-disabled={!allAnswered}
           >

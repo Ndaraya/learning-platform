@@ -36,6 +36,8 @@ type Task = {
   type: 'quiz' | 'written'
   instructions: string | null
   order: number
+  timed_mode: 'untimed' | 'practice' | 'exam'
+  time_limit_seconds: number | null
   questions: Question[]
 }
 
@@ -69,7 +71,7 @@ export default async function EditCoursePage({ params }: Props) {
         lessons (
           id, title, description, youtube_url, order,
           tasks (
-            id, title, type, instructions, order,
+            id, title, type, instructions, order, timed_mode, time_limit_seconds,
             questions (
               id, prompt, type, options, correct_answer, points, grading_rubric
             )
@@ -211,6 +213,12 @@ export default async function EditCoursePage({ params }: Props) {
                                             <Badge variant="outline" className="text-xs capitalize">
                                               {task.type}
                                             </Badge>
+                                            {task.timed_mode !== 'untimed' && (
+                                              <Badge variant="secondary" className="text-xs">
+                                                {task.timed_mode === 'exam' ? '⏱ Exam' : '⏱ Practice'}
+                                                {task.time_limit_seconds && ` · ${Math.round(task.time_limit_seconds / 60)}min`}
+                                              </Badge>
+                                            )}
                                           </div>
                                           <div className="flex items-center gap-1">
                                             <EditTaskDialog
@@ -218,6 +226,8 @@ export default async function EditCoursePage({ params }: Props) {
                                               taskId={task.id}
                                               initialTitle={task.title}
                                               initialInstructions={task.instructions}
+                                              initialTimedMode={task.timed_mode ?? 'untimed'}
+                                              initialTimeLimitSeconds={task.time_limit_seconds ?? null}
                                             />
                                             <AddQuestionDialog
                                               courseId={courseId}

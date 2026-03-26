@@ -80,7 +80,9 @@ export async function addTask(
   lessonId: string,
   title: string,
   type: 'quiz' | 'written',
-  instructions: string
+  instructions: string,
+  timedMode: 'untimed' | 'practice' | 'exam' = 'untimed',
+  timeLimitSeconds: number | null = null
 ) {
   const supabase = await createClient()
 
@@ -100,6 +102,8 @@ export async function addTask(
     type,
     instructions: instructions || null,
     order: nextOrder,
+    timed_mode: timedMode,
+    time_limit_seconds: timedMode !== 'untimed' ? timeLimitSeconds : null,
   })
 
   if (error) throw new Error(error.message)
@@ -186,12 +190,19 @@ export async function updateLesson(
 
 export async function updateTask(
   courseId: string, taskId: string,
-  title: string, instructions: string
+  title: string, instructions: string,
+  timedMode: 'untimed' | 'practice' | 'exam' = 'untimed',
+  timeLimitSeconds: number | null = null
 ) {
   const supabase = await createClient()
   const { error } = await supabase
     .from('tasks')
-    .update({ title, instructions: instructions || null })
+    .update({
+      title,
+      instructions: instructions || null,
+      timed_mode: timedMode,
+      time_limit_seconds: timedMode !== 'untimed' ? timeLimitSeconds : null,
+    })
     .eq('id', taskId)
   if (error) throw new Error(error.message)
   revalidatePath(`/admin/courses/${courseId}/edit`)

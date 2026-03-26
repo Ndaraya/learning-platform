@@ -27,7 +27,7 @@ export default async function TaskPage({ params }: Props) {
   const [{ data: task }, { data: lessonTasks }, { data: courseModules }] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, title, type, instructions, questions(id, prompt, type, options, points)')
+      .select('id, title, type, instructions, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points)')
       .eq('id', taskId)
       .single(),
     supabase
@@ -124,6 +124,8 @@ export default async function TaskPage({ params }: Props) {
             lessonId={lessonId}
             questions={questions}
             existingSubmission={existingSubmission ?? null}
+            timeLimitSeconds={(task as { time_limit_seconds?: number | null }).time_limit_seconds ?? null}
+            timedMode={((task as { timed_mode?: string }).timed_mode ?? 'untimed') as 'untimed' | 'practice' | 'exam'}
           />
 
           {/* Back / Next navigation (shown before submission) */}
