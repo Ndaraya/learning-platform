@@ -13,6 +13,7 @@ export default async function CourseCatalogPage() {
     .order('created_at', { ascending: false })
 
   return (
+    <div className="container mx-auto px-4 py-8">
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Course Catalog</h1>
@@ -48,6 +49,7 @@ export default async function CourseCatalogPage() {
       ) : (
         <p className="text-muted-foreground">No courses are available yet. Check back soon.</p>
       )}
+    </div>
     </div>
   )
 }

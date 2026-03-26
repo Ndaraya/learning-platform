@@ -32,7 +32,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
           </div>
         </nav>
       </header>
-      <main id="main-content" className="flex-1 container mx-auto px-4 py-8" role="main">
+      <main id="main-content" className="flex-1" role="main">
         {children}
       </main>
       <footer role="contentinfo" className="border-t py-4 text-center text-sm text-muted-foreground">

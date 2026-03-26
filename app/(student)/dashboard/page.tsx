@@ -62,6 +62,7 @@ export default async function StudentDashboardPage() {
   const activeEnrollments = (enrollments ?? []).filter((e) => !e.completed_at)
 
   return (
+    <div className="container mx-auto px-4 py-8">
     <div className="space-y-10">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Welcome back, {name}</h1>
@@ -150,6 +151,7 @@ export default async function StudentDashboardPage() {
           </Card>
         )}
       </section>
+    </div>
     </div>
   )
 }
