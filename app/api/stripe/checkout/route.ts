@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) return NextResponse.redirect(new URL('/login', request.url))
+  if (!user) return NextResponse.redirect(new URL('/login', request.url), 303)
 
   const formData = await request.formData()
   const tier     = formData.get('tier')?.toString() ?? 'pro'
@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[checkout] error:', msg)
-    return NextResponse.redirect(new URL(`/pricing?error=${encodeURIComponent(msg)}`, request.url))
+    return NextResponse.redirect(new URL(`/pricing?error=${encodeURIComponent(msg)}`, request.url), 303)
   }
 
-  return NextResponse.redirect(new URL(session.url!))
+  return NextResponse.redirect(session.url!, 303)
 }
