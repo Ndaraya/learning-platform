@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseSidebar } from '@/components/student/CourseSidebar'
+import { CollapsibleModuleList } from '@/components/student/CollapsibleModuleList'
 
 interface Props {
   params: Promise<{ courseId: string }>
@@ -191,59 +192,17 @@ export default async function CourseDetailPage({ params }: Props) {
           {modules.length > 0 && (
             <section aria-labelledby="tasks-heading">
               <h2 id="tasks-heading" className="text-2xl font-bold text-gray-900">
-                Tasks in this program
+                Lessons in this program
               </h2>
-              <div className="mt-4 rounded-xl border overflow-hidden">
-                {modules.map((module, i) => {
-                  const sortedLessons = [...(module.lessons ?? [])].sort((a, b) => a.order - b.order)
-                  return (
-                    <div
-                      key={module.id}
-                      className="flex border-b last:border-b-0"
-                    >
-                      {/* Left: task number + name */}
-                      <div className="w-48 shrink-0 border-r p-4 bg-gray-50 flex items-start gap-3">
-                        <span
-                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold text-white"
-                          style={{ backgroundColor: 'var(--brand)', borderColor: 'var(--brand)' }}
-                          aria-hidden="true"
-                        >
-                          {i + 1}
-                        </span>
-                        <span className="text-sm font-semibold text-gray-800">{module.title}</span>
-                      </div>
-
-                      {/* Right: description + lessons */}
-                      <div className="flex-1 p-4">
-                        {module.description && (
-                          <p className="text-sm text-gray-600 mb-3">{module.description}</p>
-                        )}
-                        {sortedLessons.length > 0 && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Lessons</p>
-                            <ul className="space-y-1 list-none p-0 m-0">
-                              {sortedLessons.map((lesson) => (
-                                <li key={lesson.id}>
-                                  {enrollment ? (
-                                    <Link
-                                      href={`/courses/${courseId}/lessons/${lesson.id}`}
-                                      className="text-sm hover:underline underline-offset-4"
-                                      style={{ color: 'var(--brand)' }}
-                                    >
-                                      {lesson.title}
-                                    </Link>
-                                  ) : (
-                                    <span className="text-sm text-gray-400">{lesson.title}</span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+              <p className="mt-1 text-sm text-gray-500">
+                {modules.reduce((sum, m) => sum + (m.lessons?.length ?? 0), 0)} lessons across {modules.length} sections
+              </p>
+              <div className="mt-4">
+                <CollapsibleModuleList
+                  courseId={courseId}
+                  modules={modules}
+                  enrolled={!!enrollment}
+                />
               </div>
             </section>
           )}
