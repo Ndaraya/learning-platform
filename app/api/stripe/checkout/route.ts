@@ -30,27 +30,29 @@ export async function POST(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  // Re-use existing Stripe customer or create one
-  let customerId = profile?.stripe_customer_id ?? null
-
-  if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: profile?.email ?? user.email ?? '',
-      name:  profile?.display_name ?? undefined,
-      metadata: { supabase_user_id: user.id },
-    })
-    customerId = customer.id
-
-    await supabase
-      .from('profiles')
-      .update({ stripe_customer_id: customerId })
-      .eq('id', user.id)
-  }
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  console.log('[checkout] priceId:', priceId, 'appUrl:', appUrl, 'user:', user.id)
 
   let session
   try {
+    // Re-use existing Stripe customer or create one
+    let customerId = (profile as { stripe_customer_id?: string | null } | null)?.stripe_customer_id ?? null
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: profile?.email ?? user.email ?? '',
+        name:  (profile as { display_name?: string | null } | null)?.display_name ?? undefined,
+        metadata: { supabase_user_id: user.id },
+      })
+      customerId = customer.id
+      console.log('[checkout] created customer:', customerId)
+
+      await supabase
+        .from('profiles')
+        .update({ stripe_customer_id: customerId })
+        .eq('id', user.id)
+    }
+
     session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
@@ -63,8 +65,9 @@ export async function POST(request: NextRequest) {
       },
       allow_promotion_codes: true,
     })
+    console.log('[checkout] session created:', session.id, 'url:', session.url)
   } catch (err) {
-    console.error('Stripe checkout error:', err)
+    console.error('[checkout] error:', err)
     return NextResponse.redirect(new URL(`/pricing?error=checkout_failed`, request.url))
   }
 
