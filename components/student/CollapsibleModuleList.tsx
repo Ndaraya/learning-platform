@@ -71,8 +71,8 @@ export function CollapsibleModuleList({ courseId, modules, enrolled }: Props) {
             <ul role="list" className="divide-y bg-white list-none p-0 m-0">
               {sortedLessons.map((lesson, j) => (
                 <li key={lesson.id} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-xs text-gray-400 w-5 text-right shrink-0" aria-hidden="true">
-                    {j + 1}
+                  <span className="text-xs text-gray-400 w-8 text-right shrink-0 font-mono" aria-hidden="true">
+                    {i + 1}.{j + 1}
                   </span>
                   {enrolled ? (
                     <Link

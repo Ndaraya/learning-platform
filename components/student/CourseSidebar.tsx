@@ -89,7 +89,7 @@ export function CourseSidebar({ courseId, modules, currentLessonId }: Props) {
                   </summary>
 
                   <ul role="list" className="mt-1 ml-5 mb-2 space-y-0.5 border-l border-gray-100 pl-3 list-none p-0 m-0">
-                    {sortedLessons.map((lesson) => {
+                    {sortedLessons.map((lesson, j) => {
                       const isCurrent = lesson.id === currentLessonId
                       return (
                         <li key={lesson.id}>
@@ -103,7 +103,7 @@ export function CourseSidebar({ courseId, modules, currentLessonId }: Props) {
                             }
                             aria-current={isCurrent ? 'page' : undefined}
                           >
-                            {lesson.title}
+                            <span className="opacity-60 mr-1">{i + 1}.{j + 1}</span>{lesson.title}
                           </Link>
                         </li>
                       )
