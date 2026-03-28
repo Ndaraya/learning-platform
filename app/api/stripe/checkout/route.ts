@@ -67,8 +67,9 @@ export async function POST(request: NextRequest) {
     })
     console.log('[checkout] session created:', session.id, 'url:', session.url)
   } catch (err) {
-    console.error('[checkout] error:', err)
-    return NextResponse.redirect(new URL(`/pricing?error=checkout_failed`, request.url))
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[checkout] error:', msg)
+    return NextResponse.redirect(new URL(`/pricing?error=${encodeURIComponent(msg)}`, request.url))
   }
 
   return NextResponse.redirect(new URL(session.url!))
