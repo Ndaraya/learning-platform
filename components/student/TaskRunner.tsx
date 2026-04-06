@@ -15,6 +15,7 @@ interface Question {
   type: 'mcq' | 'written'
   options: string[] | null
   points: number
+  image_url?: string | null
 }
 
 interface QuestionResponse {
@@ -41,6 +42,19 @@ interface Props {
   existingSubmission: ExistingSubmission | null
   timeLimitSeconds: number | null
   timedMode: 'untimed' | 'practice' | 'exam'
+}
+
+function PromptText({ text }: { text: string }) {
+  // Split on <u>...</u> tags so underlined ACT passage text renders with an actual underline
+  const parts = text.split(/(<u>[\s\S]*?<\/u>)/)
+  return (
+    <span style={{ whiteSpace: 'pre-line' }}>
+      {parts.map((part, i) => {
+        const match = part.match(/^<u>([\s\S]*?)<\/u>$/)
+        return match ? <u key={i}>{match[1]}</u> : <span key={i}>{part}</span>
+      })}
+    </span>
+  )
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -244,9 +258,16 @@ export function TaskRunner({
               return (
                 <Card key={q.id}>
                   <CardHeader className="pb-2">
+                    {q.image_url && (
+                      <img
+                        src={q.image_url}
+                        alt={`Question ${i + 1} image`}
+                        className="rounded-md border max-w-full mb-2"
+                      />
+                    )}
                     <div className="flex items-start justify-between gap-3">
                       <CardTitle className="text-sm font-medium leading-snug">
-                        Q{i + 1}. {q.prompt}
+                        Q{i + 1}. <PromptText text={q.prompt} />
                       </CardTitle>
                       <Badge variant={correct ? 'default' : 'secondary'} className="shrink-0" aria-label={`Score: ${scoreLabel}`}>
                         {scoreLabel}
@@ -388,8 +409,15 @@ export function TaskRunner({
         {questions.map((q, i) => (
           <Card key={q.id}>
             <CardHeader>
+              {q.image_url && (
+                <img
+                  src={q.image_url}
+                  alt={`Question ${i + 1} image`}
+                  className="rounded-md border max-w-full mb-2"
+                />
+              )}
               <CardTitle className="text-sm font-medium leading-snug" id={`q-${q.id}-label`}>
-                Q{i + 1}. {q.prompt}
+                Q{i + 1}. <PromptText text={q.prompt} />
                 <span className="ml-2 text-xs font-normal text-muted-foreground">
                   ({q.points} pt{q.points !== 1 ? 's' : ''})
                 </span>
