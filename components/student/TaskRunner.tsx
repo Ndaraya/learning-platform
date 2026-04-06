@@ -42,6 +42,8 @@ interface Props {
   existingSubmission: ExistingSubmission | null
   timeLimitSeconds: number | null
   timedMode: 'untimed' | 'practice' | 'exam'
+  nextHref: string | null
+  nextLabel: string
 }
 
 function PromptText({ text }: { text: string }) {
@@ -79,7 +81,7 @@ const STORAGE_KEY = (taskId: string) => `lp-task-start-${taskId}`
 
 export function TaskRunner({
   taskId, courseId, lessonId, questions, existingSubmission,
-  timeLimitSeconds, timedMode,
+  timeLimitSeconds, timedMode, nextHref, nextLabel,
 }: Props) {
   const router = useRouter()
 
@@ -305,26 +307,37 @@ export function TaskRunner({
 
         <Separator />
 
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}>
-            Back to lesson
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              hasSubmitted.current = false
-              setSubmission(null)
-              setAnswers({})
-              if (timeLimitSeconds && timedMode !== 'untimed') {
-                localStorage.removeItem(STORAGE_KEY(taskId))
-                setTimeLeft(timeLimitSeconds)
-                setTimeExpired(false)
-                setTimerEnabled(timedMode === 'exam')
-              }
-            }}
-          >
-            Retake task
-          </Button>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}>
+              Back to lesson
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                hasSubmitted.current = false
+                setSubmission(null)
+                setAnswers({})
+                if (timeLimitSeconds && timedMode !== 'untimed') {
+                  localStorage.removeItem(STORAGE_KEY(taskId))
+                  setTimeLeft(timeLimitSeconds)
+                  setTimeExpired(false)
+                  setTimerEnabled(timedMode === 'exam')
+                }
+              }}
+            >
+              Retake task
+            </Button>
+          </div>
+          {nextHref && (
+            <Button
+              onClick={() => router.push(nextHref)}
+              style={{ backgroundColor: 'var(--brand)' }}
+              className="text-white hover:opacity-90"
+            >
+              {nextLabel} →
+            </Button>
+          )}
         </div>
       </div>
     )
