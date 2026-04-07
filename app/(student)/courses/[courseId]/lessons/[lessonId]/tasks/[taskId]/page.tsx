@@ -268,7 +268,8 @@ export default async function TaskPage({ params }: Props) {
               </Link>
             )}
 
-            {nextTaskId ? (
+            {/* For quiz/written tasks, TaskRunner shows its own Next button in the results view */}
+            {taskType !== 'video' && taskType !== 'pdf' && taskType !== 'text' && taskType !== 'image' ? null : nextTaskId ? (
               isCurrentTaskSubmitted ? (
                 <Link
                   href={`/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`}
