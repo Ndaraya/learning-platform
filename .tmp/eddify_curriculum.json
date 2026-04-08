@@ -1,0 +1,554 @@
+[
+  {
+    "order": 1,
+    "title": "Requirements & Resources",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11548",
+        "title": "SAT Prerequisite Requirements",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11546",
+        "title": "Official SAT Practice Tests",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "21252",
+        "title": "SAT Calendar",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 2,
+    "title": "Questions & Office Hours",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11638",
+        "title": "Submit Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 3,
+    "title": "Integers",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11235",
+        "title": "Addition & Subtraction",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11236",
+        "title": "Multiplication & Division",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 4,
+    "title": "Fractions",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11258",
+        "title": "Fractions Introduction",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11237",
+        "title": "Fraction Addition & Subtraction",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "11238",
+        "title": "Fraction Multiplication & Division",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 5,
+    "title": "Order of Operations",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11266",
+        "title": "PEMDAS",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11615",
+        "title": "Number Operations Practice",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 6,
+    "title": "Properties of Exponents & Radicals",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11265",
+        "title": "Properties of Exponents",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11620",
+        "title": "Introduction to Radicals",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "11259",
+        "title": "Adding and Subtracting Radicals",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "11618",
+        "title": "Multiplying and Dividing Radicals",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "11260",
+        "title": "Rationalizing (Conjugates)",
+        "video_url": null
+      },
+      {
+        "order": 6,
+        "item_id": "21968",
+        "title": "QBank: More Practice Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 7,
+    "title": "Complex Numbers",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11261",
+        "title": "Imaginary Number (i)",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11628",
+        "title": "Addition, Subtraction, and Multiplication",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "11629",
+        "title": "Division & Conjugates",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "11262",
+        "title": "Complex #s SAT & ACT Questions",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "21981",
+        "title": "QBank: More Practice Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 8,
+    "title": "Linear Functions",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11401",
+        "title": "Converting Between Forms",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11264",
+        "title": "Graphing",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "11402",
+        "title": "Linear Functions SAT & ACT Q’s",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "21941",
+        "title": "QBank: More Practice Questions",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "21984",
+        "title": "QBank: Interpreting Linear Equations",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 9,
+    "title": "Systems of Equations",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17917",
+        "title": "Systems Introduction",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "18006",
+        "title": "Solving Systems",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "17919",
+        "title": "Mixture Problems (Coming Soon)",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "17918",
+        "title": "Systems SAT & ACT Q’s",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 10,
+    "title": "Function Notation",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17854",
+        "title": "Function Notation & Composition",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "17857",
+        "title": "Function Notation SAT & ACT Q’s",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "21974",
+        "title": "QBank: More Practice Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 11,
+    "title": "Quadratic Functions",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11561",
+        "title": "Forms & Converting Forms",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11268",
+        "title": "Graphing",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 12,
+    "title": "Factoring",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17555",
+        "title": "GCF & Grouping",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "17629",
+        "title": "Quadratic Equations",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "17630",
+        "title": "Sum & Difference of Cubes",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "17631",
+        "title": "Factoring SAT & ACT Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 13,
+    "title": "Polynomial Division",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17897",
+        "title": "Long and Synthetic Division",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "17898",
+        "title": "Polynomial Division SAT & ACT Q’s",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 14,
+    "title": "Similarity",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17896",
+        "title": "Similar Figures",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 15,
+    "title": "Lines, Angles, & Triangles",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "17307",
+        "title": "Lines & Angle Relationships",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "17309",
+        "title": "Degrees/Radians & Regular Polygons",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "17311",
+        "title": "Lines & Angles SAT & ACT Questions",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "11270",
+        "title": "Types of Triangles & Trigonometry",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "11271",
+        "title": "Special Right & Complimentary Angles",
+        "video_url": null
+      },
+      {
+        "order": 6,
+        "item_id": "17324",
+        "title": "Triangles SAT & ACT Questions",
+        "video_url": null
+      },
+      {
+        "order": 7,
+        "item_id": "23777",
+        "title": "PRACTICE: Lines, Angles, & Triangles (Easy & Medium)",
+        "video_url": null
+      },
+      {
+        "order": 8,
+        "item_id": "23780",
+        "title": "PRACTICE: Lines, Angles, & Triangles (Hard)",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 16,
+    "title": "Circles",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "11274",
+        "title": "Area of Sector and Arc Length",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "11276",
+        "title": "Sector and Arc SAT & ACT Questions",
+        "video_url": "https://fast.wistia.com/medias/v3bokwbbkh"
+      },
+      {
+        "order": 3,
+        "item_id": "11273",
+        "title": "Standard & General Formula of Circles",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "17405",
+        "title": "Circle Formula SAT & ACT Questions",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "23770",
+        "title": "Circles Practice Questions (Hard)",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 17,
+    "title": "Parent Functions & Transformations",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21554",
+        "title": "Identifying Functions",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "21555",
+        "title": "Parent Functions & Transformations",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "21556",
+        "title": "Transformations Exploration (Desmos)",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "21557",
+        "title": "Parent Functions & Transformations Practice",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 18,
+    "title": "Data & Statistics",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21535",
+        "title": "Fundamental Counting Principle",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "21536",
+        "title": "Intro to Probability",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "21537",
+        "title": "“AND/OR” Probability",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "21538",
+        "title": "Mean, Median, & Mode",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "21539",
+        "title": "Mean Median Mode Practice",
+        "video_url": null
+      },
+      {
+        "order": 6,
+        "item_id": "21541",
+        "title": "Correlation",
+        "video_url": null
+      },
+      {
+        "order": 7,
+        "item_id": "21542",
+        "title": "Two-Way Frequency Tables",
+        "video_url": null
+      },
+      {
+        "order": 8,
+        "item_id": "21543",
+        "title": "FCM, Probability, & Frequency Practice",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 19,
+    "title": "ACT Special Topics (Coming Soon)",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20400",
+        "title": "Logs",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "20401",
+        "title": "Matrices",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "20402",
+        "title": "Law of Sines and Cosines",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 20,
+    "title": "Question Bank",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20304",
+        "title": "Proceed to EDDIFY’s Question Bank",
+        "video_url": null
+      }
+    ]
+  }
+]

@@ -2,28 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseSidebar } from '@/components/student/CourseSidebar'
+import { VideoEmbed } from '@/components/VideoEmbed'
+import { MarkdownContent } from '@/components/MarkdownContent'
+import { ImageGallery } from '@/components/ImageGallery'
 
 interface Props {
   params: Promise<{ courseId: string; lessonId: string }>
-}
-
-function YouTubeEmbed({ url, title }: { url: string; title: string }) {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?\s]+)/)
-  const videoId = match?.[1]
-  if (!videoId) return <p className="text-destructive text-sm">Invalid video URL.</p>
-
-  return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black shadow-md">
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-        title={title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="absolute inset-0 w-full h-full"
-        aria-label={`Video: ${title}`}
-      />
-    </div>
-  )
 }
 
 export default async function LessonPage({ params }: Props) {
@@ -50,37 +34,60 @@ export default async function LessonPage({ params }: Props) {
       .single(),
     supabase
       .from('modules')
-      .select('id, title, order, lessons(id, title, order)')
+      .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
   ])
 
   if (!lesson) notFound()
 
+  const lessonType = (lesson as { lesson_type?: string }).lesson_type ?? 'video'
+  const contentUrl = (lesson as { content_url?: string | null }).content_url ?? lesson.youtube_url ?? null
+  const contentBody = (lesson as { content_body?: string | null }).content_body ?? null
+  const imageUrls = (lesson as { image_urls?: string[] }).image_urls ?? []
+
   const tasks = (lesson.tasks as Array<{ id: string; title: string; type: string; order: number }>)
     ?.sort((a, b) => a.order - b.order) ?? []
 
   const modules = (courseModules ?? []) as Array<{
-    id: string; title: string; order: number
+    id: string; title: string; section: string | null; order: number
     lessons: Array<{ id: string; title: string; order: number }>
   }>
 
-  // Find which module this lesson belongs to and its lessons for step nav
   const parentModule = modules.find((m) => m.lessons?.some((l) => l.id === lessonId))
   const moduleLessons = [...(parentModule?.lessons ?? [])].sort((a, b) => a.order - b.order)
   const lessonIndex = moduleLessons.findIndex((l) => l.id === lessonId)
 
-  // Step 1 = overview/video, steps 2+ = tasks
+  const parentModuleIndex = modules.findIndex((m) => m.id === parentModule?.id)
+  const nextModule = parentModuleIndex >= 0 ? modules[parentModuleIndex + 1] : null
+  const nextModuleFirstLesson = nextModule
+    ? [...(nextModule.lessons ?? [])].sort((a, b) => a.order - b.order)[0]
+    : null
+
   const totalSteps = 1 + tasks.length
   const currentStep = 1
   const nextTask = tasks[0]
+
+  const contentTypeLabel: Record<string, string> = {
+    video: 'Introduction video',
+    text: 'Reading',
+    pdf: 'Document',
+    image: 'Visual reference',
+  }
+
+  const taskVerb: Record<string, string> = {
+    video: 'Watch the video introduction',
+    text: 'Read the lesson content',
+    pdf: 'Review the document',
+    image: 'Study the images',
+  }
 
   return (
     <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
       <CourseSidebar courseId={courseId} modules={modules} currentLessonId={lessonId} />
 
       <div className="flex-1 overflow-y-auto">
-        {/* Top bar: lesson title + step pagination */}
+        {/* Top bar */}
         <div className="border-b bg-white px-8 py-3 flex items-center justify-between sticky top-0 z-10">
           <span className="text-sm font-medium text-gray-700 truncate max-w-md">{lesson.title}</span>
           {totalSteps > 1 && (
@@ -107,7 +114,6 @@ export default async function LessonPage({ params }: Props) {
         {/* Content */}
         <div className="max-w-3xl mx-auto px-8 py-8 space-y-8">
 
-          {/* Task overview */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Task Overview</h1>
           </div>
@@ -124,7 +130,7 @@ export default async function LessonPage({ params }: Props) {
             <div className="rounded-xl border p-5 space-y-2">
               <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>What you&apos;ll do</p>
               <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-                <li>Watch the video introduction</li>
+                <li>{taskVerb[lessonType] ?? 'Review the lesson content'}</li>
                 {tasks.map((t) => (
                   <li key={t.id}>Complete: {t.title}</li>
                 ))}
@@ -132,29 +138,60 @@ export default async function LessonPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Video */}
-          <section aria-labelledby="video-heading">
-            <h2 id="video-heading" className="text-lg font-semibold text-gray-900 mb-3">
-              Introduction
+          {/* Lesson content — type-specific */}
+          <section aria-labelledby="lesson-content-heading">
+            <h2 id="lesson-content-heading" className="text-lg font-semibold text-gray-900 mb-3">
+              {contentTypeLabel[lessonType] ?? 'Content'}
             </h2>
-            <YouTubeEmbed url={lesson.youtube_url} title={lesson.title} />
-            <p className="mt-2 text-xs text-gray-400">Watch this video to get started with the task.</p>
+
+            {lessonType === 'video' && contentUrl && (
+              <VideoEmbed url={contentUrl} title={lesson.title} />
+            )}
+
+            {lessonType === 'text' && (
+              <div className="space-y-4">
+                {contentBody && (
+                  <div className="rounded-xl border p-6 bg-white">
+                    <MarkdownContent body={contentBody} />
+                  </div>
+                )}
+                {contentUrl && (
+                  <a
+                    href={contentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Read full article →
+                  </a>
+                )}
+              </div>
+            )}
+
+            {lessonType === 'pdf' && contentUrl && (
+              <iframe
+                src={contentUrl}
+                title={`${lesson.title} — PDF`}
+                className="w-full rounded-xl border"
+                style={{ height: '70vh' }}
+              />
+            )}
+
+            {lessonType === 'image' && imageUrls.length > 0 && (
+              <ImageGallery urls={imageUrls} altPrefix={lesson.title} />
+            )}
           </section>
 
           {/* Next button */}
           <div className="flex items-center justify-between pt-4 border-t">
             {lessonIndex > 0 && moduleLessons[lessonIndex - 1] ? (
-              <Link
-                href={`/courses/${courseId}/lessons/${moduleLessons[lessonIndex - 1].id}`}
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-              >
+              <Link href={`/courses/${courseId}/lessons/${moduleLessons[lessonIndex - 1].id}`}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                 ← Back
               </Link>
             ) : (
-              <Link
-                href={`/courses/${courseId}`}
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-              >
+              <Link href={`/courses/${courseId}`}
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
                 ← Back to overview
               </Link>
             )}
@@ -168,14 +205,24 @@ export default async function LessonPage({ params }: Props) {
                 Next →
               </Link>
             ) : moduleLessons[lessonIndex + 1] ? (
-              <Link
-                href={`/courses/${courseId}/lessons/${moduleLessons[lessonIndex + 1].id}`}
+              <Link href={`/courses/${courseId}/lessons/${moduleLessons[lessonIndex + 1].id}`}
                 className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: 'var(--brand)' }}
-              >
+                style={{ backgroundColor: 'var(--brand)' }}>
                 Next lesson →
               </Link>
-            ) : null}
+            ) : nextModuleFirstLesson ? (
+              <Link href={`/courses/${courseId}/lessons/${nextModuleFirstLesson.id}`}
+                className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: 'var(--brand)' }}>
+                Next section: {nextModule!.title} →
+              </Link>
+            ) : (
+              <Link href={`/courses/${courseId}`}
+                className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: 'var(--brand)' }}>
+                Back to overview →
+              </Link>
+            )}
           </div>
         </div>
       </div>

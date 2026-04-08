@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    return NextResponse.redirect(new URL('/login', request.url), 303)
   }
 
   const formData = await request.formData()
@@ -52,5 +52,17 @@ export async function POST(request: NextRequest) {
   const name = profile?.display_name ?? user.email?.split('@')[0] ?? 'there'
   sendEnrollmentEmail(user.email!, name, course.title, courseId).catch(() => {})
 
-  return NextResponse.redirect(new URL(`/courses/${courseId}`, request.url))
+  // Check if a baseline exists — first-time enrollees go to onboarding
+  const { data: baseline } = await supabase
+    .from('act_baselines')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('course_id', courseId)
+    .maybeSingle()
+
+  if (!baseline) {
+    return NextResponse.redirect(new URL(`/courses/${courseId}/onboarding`, request.url), 303)
+  }
+
+  return NextResponse.redirect(new URL(`/courses/${courseId}`, request.url), 303)
 }

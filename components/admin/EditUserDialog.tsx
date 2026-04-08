@@ -13,18 +13,22 @@ interface Org {
   name: string
 }
 
+type TimeAccommodation = 'standard' | 'time_and_half' | 'double'
+
 interface Props {
   userId: string
   userName: string
   currentRole: UserRole
   currentOrgId: string | null
+  currentTimeAccommodation: TimeAccommodation
   organizations: Org[]
 }
 
-export function EditUserDialog({ userId, userName, currentRole, currentOrgId, organizations }: Props) {
+export function EditUserDialog({ userId, userName, currentRole, currentOrgId, currentTimeAccommodation, organizations }: Props) {
   const [open, setOpen] = useState(false)
   const [role, setRole] = useState<UserRole>(currentRole)
   const [orgId, setOrgId] = useState<string>(currentOrgId ?? '')
+  const [timeAccommodation, setTimeAccommodation] = useState<TimeAccommodation>(currentTimeAccommodation)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -39,7 +43,7 @@ export function EditUserDialog({ userId, userName, currentRole, currentOrgId, or
 
     startTransition(async () => {
       try {
-        await updateUserRole(userId, role, role === 'org_admin' ? orgId : null)
+        await updateUserRole(userId, role, role === 'org_admin' ? orgId : null, timeAccommodation)
         setOpen(false)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to update user')
@@ -92,6 +96,23 @@ export function EditUserDialog({ userId, userName, currentRole, currentOrgId, or
               </p>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="time-accommodation">Time accommodation</Label>
+            <Select value={timeAccommodation} onValueChange={(v) => setTimeAccommodation(v as TimeAccommodation)}>
+              <SelectTrigger id="time-accommodation" aria-label="Time accommodation">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Standard (1×)</SelectItem>
+                <SelectItem value="time_and_half">Time and a half (1.5×)</SelectItem>
+                <SelectItem value="double">Double time (2×)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              For students with IEP/504 accommodations. Applies to all timed tasks.
+            </p>
+          </div>
 
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 

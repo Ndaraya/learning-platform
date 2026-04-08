@@ -14,7 +14,7 @@ export default async function UsersPage() {
   const [{ data: users }, { data: orgs }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, display_name, email, role, org_id, created_at, organizations(name)')
+      .select('id, display_name, email, role, org_id, time_accommodation, created_at, organizations(name)')
       .order('created_at', { ascending: false }),
     supabase
       .from('organizations')
@@ -63,6 +63,7 @@ export default async function UsersPage() {
                         userName={u.display_name ?? u.email}
                         currentRole={role}
                         currentOrgId={u.org_id ?? null}
+                        currentTimeAccommodation={(u.time_accommodation as 'standard' | 'time_and_half' | 'double') ?? 'standard'}
                         organizations={organizations}
                       />
                     </TableCell>

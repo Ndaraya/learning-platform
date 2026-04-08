@@ -1,5 +1,6 @@
 export type UserRole = 'student' | 'admin' | 'org_admin' | 'super_admin'
-export type TaskType = 'quiz' | 'written'
+export type LessonType = 'video' | 'text' | 'pdf' | 'image'
+export type TaskType = 'quiz' | 'written' | 'video' | 'pdf' | 'text' | 'image'
 export type QuestionType = 'mcq' | 'written'
 export type SubscriptionTier = 'free' | 'pro' | 'enterprise'
 
@@ -37,6 +38,7 @@ export interface Module {
   course_id: string
   title: string
   description: string | null
+  section: string | null
   order: number
   created_at: string
 }
@@ -46,7 +48,11 @@ export interface Lesson {
   module_id: string
   title: string
   description: string | null
-  youtube_url: string
+  lesson_type: LessonType
+  youtube_url: string | null      // legacy; content_url preferred for new lessons
+  content_url: string | null      // video URL, PDF URL, or external article link
+  content_body: string | null     // inline text/markdown
+  image_urls: string[]            // gallery image URLs
   order: number
   created_at: string
 }
@@ -57,6 +63,9 @@ export interface Task {
   title: string
   type: TaskType
   instructions: string | null
+  video_url: string | null        // used for video/pdf tasks
+  content_body: string | null     // used for text/image tasks
+  image_urls: string[]            // used for image tasks
   order: number
   created_at: string
 }
@@ -70,6 +79,7 @@ export interface Question {
   correct_answer: string | null  // MCQ correct option
   points: number
   grading_rubric: string | null  // Written questions
+  image_url: string | null       // Optional uploaded question image
   created_at: string
 }
 
@@ -111,4 +121,37 @@ export interface QuestionResponse {
   feedback: string | null
   ai_graded: boolean
   created_at: string
+}
+
+export interface PracticeTest {
+  id: string
+  course_id: string
+  title: string
+  description: string | null
+  // {"english": {"1": "A", ...}, "math": {...}, ...}
+  answer_key: Record<string, Record<string, string>>
+  // {"english": {"40": 36, ...}, ...}
+  scoring_table: Record<string, Record<string, number>>
+  // {"english": 75, "math": 60, "reading": 40, "science": 40}
+  question_counts: Record<string, number>
+  published: boolean
+  created_at: string
+}
+
+export interface PracticeTestSubmission {
+  id: string
+  user_id: string
+  practice_test_id: string
+  english_score: number | null
+  math_score: number | null
+  reading_score: number | null
+  science_score: number | null
+  composite_score: number | null
+  raw_english: number | null
+  raw_math: number | null
+  raw_reading: number | null
+  raw_science: number | null
+  // {"english": {"1": "A", ...}, "math": {...}, ...}
+  responses: Record<string, Record<string, string>>
+  submitted_at: string
 }

@@ -24,11 +24,53 @@ export function AddQuestionDialog({ courseId, taskId, taskType }: Props) {
   const [correctAnswer, setCorrectAnswer] = useState('')
   const [points, setPoints] = useState(10)
   const [rubric, setRubric] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [extracting, setExtracting] = useState(false)
+  const [extractError, setExtractError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function updateOption(index: number, value: string) {
     setOptions((prev) => prev.map((o, i) => (i === index ? value : o)))
+  }
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setImageFile(f)
+    setImagePreview(URL.createObjectURL(f))
+    setExtractError(null)
+  }
+
+  function removeImage() {
+    setImageFile(null)
+    setImagePreview(null)
+    setExtractError(null)
+  }
+
+  async function handleExtract() {
+    if (!imageFile) return
+    setExtracting(true)
+    setExtractError(null)
+    try {
+      const form = new FormData()
+      form.append('image', imageFile)
+      const res = await fetch('/api/questions/extract', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Extraction failed')
+      if (data.prompt) setPrompt(data.prompt)
+      if (data.type) setType(data.type)
+      if (Array.isArray(data.options) && data.options.length) {
+        setOptions([...data.options, '', '', '', ''].slice(0, 4))
+        setCorrectAnswer('')
+      }
+      if (data.correct_answer) setCorrectAnswer(data.correct_answer)
+    } catch (err) {
+      setExtractError(err instanceof Error ? err.message : 'Extraction failed')
+    } finally {
+      setExtracting(false)
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -43,16 +85,27 @@ export function AddQuestionDialog({ courseId, taskId, taskType }: Props) {
 
     startTransition(async () => {
       try {
+        let imageUrl: string | null = null
+        if (imageFile) {
+          const form = new FormData()
+          form.append('image', imageFile)
+          const res = await fetch('/api/questions/upload-image', { method: 'POST', body: form })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error ?? 'Image upload failed')
+          imageUrl = data.url
+        }
         await addQuestion(
           courseId, taskId, prompt, type,
           options.filter((o) => o.trim()),
-          correctAnswer, points, rubric
+          correctAnswer, points, rubric, imageUrl
         )
         setPrompt('')
         setOptions(['', '', '', ''])
         setCorrectAnswer('')
         setPoints(10)
         setRubric('')
+        setImageFile(null)
+        setImagePreview(null)
         setOpen(false)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to add question')
@@ -72,6 +125,43 @@ export function AddQuestionDialog({ courseId, taskId, taskType }: Props) {
           <DialogTitle id="add-question-title">Add question</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
+
+          {/* Image upload */}
+          <div className="space-y-2">
+            <Label>Question image (optional)</Label>
+            {imagePreview ? (
+              <div className="space-y-2">
+                <img
+                  src={imagePreview}
+                  alt="Question preview"
+                  className="rounded-md border max-w-full max-h-56 object-contain bg-muted"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleExtract}
+                    disabled={extracting}
+                  >
+                    {extracting ? 'Extracting…' : '✦ Extract with AI'}
+                  </Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={removeImage}>
+                    Remove
+                  </Button>
+                </div>
+                {extractError && <p className="text-xs text-destructive">{extractError}</p>}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed rounded-lg cursor-pointer hover:border-muted-foreground/60 transition-colors">
+                <span className="text-xs text-muted-foreground">Click to upload a screenshot or photo</span>
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              </label>
+            )}
+          </div>
+
+          <Separator />
+
           <div className="space-y-2">
             <Label htmlFor="q-type">Question type</Label>
             <Select value={type} onValueChange={(v) => setType(v as 'mcq' | 'written')}>
@@ -89,10 +179,10 @@ export function AddQuestionDialog({ courseId, taskId, taskType }: Props) {
             <Label htmlFor="q-prompt">Question prompt</Label>
             <Textarea
               id="q-prompt"
-              required
               rows={3}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              placeholder={imagePreview ? 'Auto-filled after extraction, or type manually' : ''}
             />
           </div>
 
@@ -170,7 +260,11 @@ export function AddQuestionDialog({ courseId, taskId, taskType }: Props) {
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={isPending || !prompt.trim()} aria-busy={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending || (!prompt.trim() && !imagePreview)}
+              aria-busy={isPending}
+            >
               {isPending ? 'Adding…' : 'Add question'}
             </Button>
           </div>

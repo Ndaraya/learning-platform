@@ -17,7 +17,7 @@ export default async function CourseDetailPage({ params }: Props) {
 
   const { data: course } = await supabase
     .from('courses')
-    .select('*, modules(id, title, description, order, lessons(id, title, order))')
+    .select('*, modules(id, title, description, section, order, lessons(id, title, order))')
     .eq('id', courseId)
     .eq('published', true)
     .single()
@@ -35,6 +35,7 @@ export default async function CourseDetailPage({ params }: Props) {
     id: string
     title: string
     description: string | null
+    section: string | null
     order: number
     lessons: Array<{ id: string; title: string; order: number }>
   }>)?.sort((a, b) => a.order - b.order) ?? []

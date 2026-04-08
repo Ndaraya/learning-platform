@@ -1,0 +1,266 @@
+[
+  {
+    "order": 1,
+    "title": "Requirements & Resources",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21057",
+        "title": "SAT Requirements",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "21059",
+        "title": "Official SAT Practice Tests",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "21254",
+        "title": "SAT Calendar",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 2,
+    "title": "Questions & Office Hours",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21437",
+        "title": "Submit Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 3,
+    "title": "Standard English Conventions",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21887",
+        "title": "Comma Splice",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "20266",
+        "title": "Clauses & Sentence Structure",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "20269",
+        "title": "Run-ons & Fragments",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "20272",
+        "title": "Parallel Structure",
+        "video_url": "https://fast.wistia.com/medias/48y2c4t51u"
+      },
+      {
+        "order": 5,
+        "item_id": "20273",
+        "title": "Correlative Coordination",
+        "video_url": "https://fast.wistia.com/medias/w7ip5bs7e9"
+      },
+      {
+        "order": 6,
+        "item_id": "21890",
+        "title": "Prepositional Phrases",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 4,
+    "title": "Punctuation",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20254",
+        "title": "Commas",
+        "video_url": null
+      },
+      {
+        "order": 2,
+        "item_id": "20255",
+        "title": "Semicolons",
+        "video_url": null
+      },
+      {
+        "order": 3,
+        "item_id": "20258",
+        "title": "Apostrophes & Possession",
+        "video_url": null
+      },
+      {
+        "order": 4,
+        "item_id": "20256",
+        "title": "Colons",
+        "video_url": null
+      },
+      {
+        "order": 5,
+        "item_id": "21898",
+        "title": "Dashes",
+        "video_url": null
+      },
+      {
+        "order": 6,
+        "item_id": "21900",
+        "title": "Parentheses",
+        "video_url": null
+      },
+      {
+        "order": 7,
+        "item_id": "21906",
+        "title": "Commas between Adjectives",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 5,
+    "title": "Who vs. Whom",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20260",
+        "title": "Who vs. Whom",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 6,
+    "title": "Transition Words",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21912",
+        "title": "Transition Words",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 7,
+    "title": "Modifiers",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20253",
+        "title": "Misplaced & Dangling Modifiers",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 8,
+    "title": "Yes, Yes, No, No",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21914",
+        "title": "Y,Y,N,N and Order Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 9,
+    "title": "Redundancy",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21918",
+        "title": "No Redundancy",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 10,
+    "title": "Specific Detail",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21920",
+        "title": "Specific Detail Questions",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 11,
+    "title": "Conventions of Usage",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "20276",
+        "title": "Subject-Verb Agreement",
+        "video_url": "https://fast.wistia.com/medias/65bzjcckc9"
+      },
+      {
+        "order": 2,
+        "item_id": "20277",
+        "title": "Pronoun Reference & Number",
+        "video_url": "https://fast.wistia.com/medias/qb1xv2gcha"
+      },
+      {
+        "order": 3,
+        "item_id": "20279",
+        "title": "Verb Tense & Gerund Participle",
+        "video_url": "https://fast.wistia.com/medias/tna2sknzr9"
+      },
+      {
+        "order": 4,
+        "item_id": "20280",
+        "title": "Adjectives & Adverbs",
+        "video_url": "https://fast.wistia.com/medias/we5a8hqdv1"
+      }
+    ]
+  },
+  {
+    "order": 12,
+    "title": "SAT Writing & Language Strategy",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21908",
+        "title": "SAT Writing Strategy",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 13,
+    "title": "ACT English Strategy",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21903",
+        "title": "ACT English Strategy",
+        "video_url": null
+      }
+    ]
+  },
+  {
+    "order": 14,
+    "title": "Question Bank",
+    "lessons": [
+      {
+        "order": 1,
+        "item_id": "21061",
+        "title": "Proceed to EDDIFY’s Question Bank",
+        "video_url": null
+      }
+    ]
+  }
+]

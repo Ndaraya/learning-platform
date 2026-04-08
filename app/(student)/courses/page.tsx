@@ -6,11 +6,20 @@ import { Badge } from '@/components/ui/badge'
 export default async function CourseCatalogPage() {
   const supabase = await createClient()
 
-  const { data: courses } = await supabase
-    .from('courses')
-    .select('id, title, description, thumbnail_url')
-    .eq('published', true)
-    .order('created_at', { ascending: false })
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const [{ data: courses }, { data: enrollments }] = await Promise.all([
+    supabase
+      .from('courses')
+      .select('id, title, description, thumbnail_url')
+      .eq('published', true)
+      .order('created_at', { ascending: false }),
+    user
+      ? supabase.from('enrollments').select('course_id').eq('user_id', user.id)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  const enrolledIds = new Set((enrollments ?? []).map((e) => e.course_id))
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -22,29 +31,43 @@ export default async function CourseCatalogPage() {
 
       {courses && courses.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
-          {courses.map((course) => (
-            <Link key={course.id} href={`/courses/${course.id}`} className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg" role="listitem">
-              <Card className="h-full transition-shadow group-hover:shadow-md">
-                {course.thumbnail_url && (
-                  <div className="aspect-video overflow-hidden rounded-t-lg">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={course.thumbnail_url}
-                      alt={`Thumbnail for ${course.title}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="text-base">{course.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">{course.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="outline">Enroll</Badge>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          {courses.map((course) => {
+            const enrolled = enrolledIds.has(course.id)
+            return (
+              <Link
+                key={course.id}
+                href={`/courses/${course.id}`}
+                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+                role="listitem"
+              >
+                <Card className="h-full transition-shadow group-hover:shadow-md">
+                  {course.thumbnail_url && (
+                    <div className="aspect-video overflow-hidden rounded-t-lg">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={course.thumbnail_url}
+                        alt={`Thumbnail for ${course.title}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-base">{course.title}</CardTitle>
+                    <CardDescription className="line-clamp-3">{course.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {enrolled ? (
+                      <Badge style={{ backgroundColor: 'var(--brand)' }} className="text-white border-0">
+                        Continue →
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Enroll</Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+          })}
         </div>
       ) : (
         <p className="text-muted-foreground">No courses are available yet. Check back soon.</p>

@@ -16,7 +16,8 @@ function adminClient() {
 export async function updateUserRole(
   userId: string,
   role: UserRole,
-  orgId: string | null
+  orgId: string | null,
+  timeAccommodation: 'standard' | 'time_and_half' | 'double' = 'standard'
 ) {
   // Verify caller is super_admin
   const supabase = await createClient()
@@ -36,6 +37,7 @@ export async function updateUserRole(
     .update({
       role,
       org_id: orgId || null,
+      time_accommodation: timeAccommodation,
     })
     .eq('id', userId)
 

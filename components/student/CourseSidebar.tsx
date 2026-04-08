@@ -9,6 +9,7 @@ interface Lesson {
 interface Module {
   id: string
   title: string
+  section: string | null
   order: number
   lessons: Lesson[]
 }
@@ -25,6 +26,19 @@ export function CourseSidebar({ courseId, modules, currentLessonId }: Props) {
   const activeModuleId = currentLessonId
     ? sorted.find((m) => m.lessons?.some((l) => l.id === currentLessonId))?.id
     : sorted[0]?.id
+
+  // Group consecutive modules by section
+  const groups: { section: string | null; items: Module[] }[] = []
+  for (const mod of sorted) {
+    const last = groups[groups.length - 1]
+    if (last && last.section === mod.section) {
+      last.items.push(mod)
+    } else {
+      groups.push({ section: mod.section, items: [mod] })
+    }
+  }
+
+  let globalIndex = 0
 
   return (
     <aside
@@ -48,68 +62,87 @@ export function CourseSidebar({ courseId, modules, currentLessonId }: Props) {
       {/* Module list */}
       <nav className="flex-1 py-3 px-2" aria-label="Course modules">
         <ol className="space-y-1 list-none p-0 m-0">
-          {sorted.map((module, i) => {
-            const isActive = module.id === activeModuleId
-            const sortedLessons = [...(module.lessons ?? [])].sort((a, b) => a.order - b.order)
+          {groups.map((group, groupIdx) => {
+            const sectionStart = globalIndex
+            globalIndex += group.items.length
 
             return (
-              <li key={module.id}>
-                <details open={isActive} className="group">
-                  <summary
-                    className="flex items-center gap-3 rounded-lg px-2 py-2.5 cursor-pointer list-none select-none transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
-                    style={{ outlineColor: 'var(--brand)' }}
-                  >
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold"
-                      style={
-                        isActive
-                          ? { borderColor: 'var(--brand)', backgroundColor: 'var(--brand)', color: 'white' }
-                          : { borderColor: '#d1d5db', color: '#6b7280' }
-                      }
-                      aria-hidden="true"
-                    >
-                      {i + 1}
-                    </span>
-                    <span
-                      className="flex-1 text-sm font-medium leading-snug"
-                      style={isActive ? { color: 'var(--brand)' } : { color: '#374151' }}
-                    >
-                      {module.title}
-                    </span>
-                    <svg
-                      className="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform group-open:rotate-180"
-                      aria-hidden="true"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
+              <li key={groupIdx}>
+                {/* Section label */}
+                {group.section && (
+                  <p className="px-2 pt-3 pb-1 text-xs font-bold uppercase tracking-wider text-gray-400 select-none first:pt-1">
+                    {group.section}
+                  </p>
+                )}
 
-                  <ul role="list" className="mt-1 ml-5 mb-2 space-y-0.5 border-l border-gray-100 pl-3 list-none p-0 m-0">
-                    {sortedLessons.map((lesson, j) => {
-                      const isCurrent = lesson.id === currentLessonId
-                      return (
-                        <li key={lesson.id}>
-                          <Link
-                            href={`/courses/${courseId}/lessons/${lesson.id}`}
-                            className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
-                            style={
-                              isCurrent
-                                ? { backgroundColor: 'var(--brand)', color: 'white', fontWeight: 600, outlineColor: 'var(--brand)' }
-                                : { color: '#4b5563', outlineColor: 'var(--brand)' }
-                            }
-                            aria-current={isCurrent ? 'page' : undefined}
+                <ol className="space-y-1 list-none p-0 m-0">
+                  {group.items.map((module, i) => {
+                    const moduleIdx = sectionStart + i
+                    const isActive = module.id === activeModuleId
+                    const sortedLessons = [...(module.lessons ?? [])].sort((a, b) => a.order - b.order)
+
+                    return (
+                      <li key={module.id}>
+                        <details open={isActive} className="group">
+                          <summary
+                            className="flex items-center gap-3 rounded-lg px-2 py-2.5 cursor-pointer list-none select-none transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                            style={{ outlineColor: 'var(--brand)' }}
                           >
-                            <span className="opacity-60 mr-1">{i + 1}.{j + 1}</span>{lesson.title}
-                          </Link>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </details>
+                            <span
+                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold"
+                              style={
+                                isActive
+                                  ? { borderColor: 'var(--brand)', backgroundColor: 'var(--brand)', color: 'white' }
+                                  : { borderColor: '#d1d5db', color: '#6b7280' }
+                              }
+                              aria-hidden="true"
+                            >
+                              {moduleIdx + 1}
+                            </span>
+                            <span
+                              className="flex-1 text-sm font-medium leading-snug"
+                              style={isActive ? { color: 'var(--brand)' } : { color: '#374151' }}
+                            >
+                              {module.title}
+                            </span>
+                            <svg
+                              className="h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform group-open:rotate-180"
+                              aria-hidden="true"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2.5}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+
+                          <ul role="list" className="mt-1 ml-5 mb-2 space-y-0.5 border-l border-gray-100 pl-3 list-none p-0 m-0">
+                            {sortedLessons.map((lesson, j) => {
+                              const isCurrent = lesson.id === currentLessonId
+                              return (
+                                <li key={lesson.id}>
+                                  <Link
+                                    href={`/courses/${courseId}/lessons/${lesson.id}`}
+                                    className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                                    style={
+                                      isCurrent
+                                        ? { backgroundColor: 'var(--brand)', color: 'white', fontWeight: 600, outlineColor: 'var(--brand)' }
+                                        : { color: '#4b5563', outlineColor: 'var(--brand)' }
+                                    }
+                                    aria-current={isCurrent ? 'page' : undefined}
+                                  >
+                                    <span className="opacity-60 mr-1">{moduleIdx + 1}.{j + 1}</span>{lesson.title}
+                                  </Link>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </details>
+                      </li>
+                    )
+                  })}
+                </ol>
               </li>
             )
           })}
