@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { TaskRunner } from '@/components/student/TaskRunner'
 import { LessonTaskSidebar } from '@/components/student/LessonTaskSidebar'
+import { PassagePanel } from '@/components/student/PassagePanel'
 import { VideoEmbed } from '@/components/VideoEmbed'
 import { VideoTaskCompleteButton } from '@/components/student/VideoTaskCompleteButton'
 import { MarkdownContent } from '@/components/MarkdownContent'
@@ -90,6 +91,13 @@ export default async function TaskPage({ params }: Props) {
   const taskContentBody = (task as { content_body?: string | null }).content_body ?? null
   const taskImageUrls = (task as { image_urls?: string[] }).image_urls ?? []
   const taskContentUrl = (task as { video_url?: string | null }).video_url ?? null
+
+  // Reading passage — present when content_body is set on a quiz task
+  const rawPassage = taskType === 'quiz' ? (taskContentBody ?? null) : null
+  const isReadingLayout = !!rawPassage
+  const passageTitle = rawPassage?.match(/^## PASSAGE:\s*(.+)/m)?.[1]?.replace(/\*[^*]*\*/g, '').trim() ?? 'Passage'
+  const passageBody = rawPassage?.replace(/^## PASSAGE:[^\n]*\n(\*[^\n]*\*\n)?/m, '').trim() ?? ''
+
   const questions = task.questions as Array<{
     id: string; prompt: string; type: 'mcq' | 'written'; options: string[] | null; points: number; image_url?: string | null
   }>
@@ -164,94 +172,143 @@ export default async function TaskPage({ params }: Props) {
           </nav>
         </div>
 
-        {/* Content */}
-        <div className="max-w-2xl mx-auto px-8 py-8 space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Here is your task</h1>
-            {task.instructions && (
-              <p className="mt-2 text-gray-600 text-sm leading-relaxed">{task.instructions}</p>
-            )}
+        {/* Content — reading tasks use a split-screen layout, all others use centered column */}
+        {isReadingLayout ? (
+          <div className="flex" style={{ height: 'calc(100vh - 8rem)' }}>
+            {/* Left panel: passage */}
+            <div className="w-[55%] shrink-0 h-full">
+              <PassagePanel title={passageTitle} body={passageBody} />
+            </div>
+
+            {/* Right panel: questions */}
+            <div className="flex-1 h-full overflow-y-auto px-6 py-6 space-y-6">
+              <TaskRunner
+                taskId={taskId}
+                courseId={courseId}
+                lessonId={lessonId}
+                questions={questions}
+                existingSubmission={existingSubmission ?? null}
+                timeLimitSeconds={(() => {
+                  const raw = (task as { time_limit_seconds?: number | null }).time_limit_seconds ?? null
+                  return raw !== null ? Math.round(raw * accommodationMultiplier) : null
+                })()}
+                timedMode={((task as { timed_mode?: string }).timed_mode ?? 'untimed') as 'untimed' | 'practice' | 'exam'}
+                nextHref={
+                  nextTaskId
+                    ? `/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`
+                    : nextLessonHref ?? `/courses/${courseId}`
+                }
+                nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
+              />
+
+              {/* Back / Next navigation */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                {prevTaskId ? (
+                  <Link
+                    href={`/courses/${courseId}/lessons/${lessonId}/tasks/${prevTaskId}`}
+                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    ← Back
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/courses/${courseId}/lessons/${lessonId}`}
+                    className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    ← Back to overview
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
-
-          {(task as { video_url?: string | null }).video_url && (
-            <VideoEmbed
-              url={(task as { video_url: string }).video_url}
-              title={task.title}
-            />
-          )}
-
-          {taskType === 'video' || taskType === 'pdf' || taskType === 'text' || taskType === 'image' ? (
-            <>
-              {taskType === 'pdf' && taskContentUrl && (
-                <iframe
-                  src={taskContentUrl}
-                  title={`${task.title} PDF`}
-                  className="w-full rounded-md border"
-                  style={{ height: '70vh' }}
-                />
+        ) : (
+          <div className="max-w-2xl mx-auto px-8 py-8 space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Here is your task</h1>
+              {task.instructions && (
+                <p className="mt-2 text-gray-600 text-sm leading-relaxed">{task.instructions}</p>
               )}
+            </div>
 
-              {taskType === 'text' && (
-                <div className="space-y-4">
-                  {taskContentBody && (
-                    <div className="rounded-xl border p-6 bg-white">
-                      <MarkdownContent body={taskContentBody} />
-                    </div>
-                  )}
-                  {taskContentUrl && (
-                    <a
-                      href={taskContentUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Read full article →
-                    </a>
-                  )}
-                </div>
-              )}
+            {(task as { video_url?: string | null }).video_url && (
+              <VideoEmbed
+                url={(task as { video_url: string }).video_url}
+                title={task.title}
+              />
+            )}
 
-              {taskType === 'image' && taskImageUrls.length > 0 && (
-                <ImageGallery urls={taskImageUrls} altPrefix={task.title} />
-              )}
+            {taskType === 'video' || taskType === 'pdf' || taskType === 'text' || taskType === 'image' ? (
+              <>
+                {taskType === 'pdf' && taskContentUrl && (
+                  <iframe
+                    src={taskContentUrl}
+                    title={`${task.title} PDF`}
+                    className="w-full rounded-md border"
+                    style={{ height: '70vh' }}
+                  />
+                )}
 
-              {!isCurrentTaskSubmitted && (
-                <VideoTaskCompleteButton
-                  taskId={taskId}
-                  courseId={courseId}
-                  lessonId={lessonId}
-                  nextHref={
-                    nextTaskId
-                      ? `/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`
-                      : nextLessonHref
-                  }
-                  fallbackHref={`/courses/${courseId}/lessons/${lessonId}`}
-                />
-              )}
-            </>
-          ) : (
-            <TaskRunner
-              taskId={taskId}
-              courseId={courseId}
-              lessonId={lessonId}
-              questions={questions}
-              existingSubmission={existingSubmission ?? null}
-              timeLimitSeconds={(() => {
-                const raw = (task as { time_limit_seconds?: number | null }).time_limit_seconds ?? null
-                return raw !== null ? Math.round(raw * accommodationMultiplier) : null
-              })()}
-              timedMode={((task as { timed_mode?: string }).timed_mode ?? 'untimed') as 'untimed' | 'practice' | 'exam'}
-              nextHref={
-                nextTaskId
-                  ? `/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`
-                  : nextLessonHref ?? `/courses/${courseId}`
-              }
-              nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
-            />
-          )}
+                {taskType === 'text' && (
+                  <div className="space-y-4">
+                    {taskContentBody && (
+                      <div className="rounded-xl border p-6 bg-white">
+                        <MarkdownContent body={taskContentBody} />
+                      </div>
+                    )}
+                    {taskContentUrl && (
+                      <a
+                        href={taskContentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Read full article →
+                      </a>
+                    )}
+                  </div>
+                )}
 
-          {/* Back / Next navigation */}
-          <div className="flex items-center justify-between pt-4 border-t">
+                {taskType === 'image' && taskImageUrls.length > 0 && (
+                  <ImageGallery urls={taskImageUrls} altPrefix={task.title} />
+                )}
+
+                {!isCurrentTaskSubmitted && (
+                  <VideoTaskCompleteButton
+                    taskId={taskId}
+                    courseId={courseId}
+                    lessonId={lessonId}
+                    nextHref={
+                      nextTaskId
+                        ? `/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`
+                        : nextLessonHref
+                    }
+                    fallbackHref={`/courses/${courseId}/lessons/${lessonId}`}
+                  />
+                )}
+              </>
+            ) : (
+              <TaskRunner
+                taskId={taskId}
+                courseId={courseId}
+                lessonId={lessonId}
+                questions={questions}
+                existingSubmission={existingSubmission ?? null}
+                timeLimitSeconds={(() => {
+                  const raw = (task as { time_limit_seconds?: number | null }).time_limit_seconds ?? null
+                  return raw !== null ? Math.round(raw * accommodationMultiplier) : null
+                })()}
+                timedMode={((task as { timed_mode?: string }).timed_mode ?? 'untimed') as 'untimed' | 'practice' | 'exam'}
+                nextHref={
+                  nextTaskId
+                    ? `/courses/${courseId}/lessons/${lessonId}/tasks/${nextTaskId}`
+                    : nextLessonHref ?? `/courses/${courseId}`
+                }
+                nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
+              />
+            )}
+
+            {/* Back / Next navigation */}
+            <div className="flex items-center justify-between pt-4 border-t">
             {prevTaskId ? (
               <Link
                 href={`/courses/${courseId}/lessons/${lessonId}/tasks/${prevTaskId}`}
@@ -335,8 +392,10 @@ export default async function TaskPage({ params }: Props) {
                 Back to overview →
               </Link>
             ) : null}
+            </div>
           </div>
-        </div>
+        )}
+
       </div>
     </div>
   )
