@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { TaskRunner } from '@/components/student/TaskRunner'
-import { LessonTaskSidebar } from '@/components/student/LessonTaskSidebar'
+import { CourseSidebar } from '@/components/student/CourseSidebar'
 import { PassagePanel } from '@/components/student/PassagePanel'
 import { VideoEmbed } from '@/components/VideoEmbed'
 import { VideoTaskCompleteButton } from '@/components/student/VideoTaskCompleteButton'
@@ -52,7 +52,7 @@ export default async function TaskPage({ params }: Props) {
       .single(),
     supabase
       .from('modules')
-      .select('id, order, lessons(id, order)')
+      .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
   ])
@@ -114,7 +114,7 @@ export default async function TaskPage({ params }: Props) {
 
   // Compute next-lesson href for end-of-lesson navigation
   const moduleId = (lesson as { module_id?: string } | null)?.module_id
-  const modules = ((courseModules ?? []) as Array<{ id: string; order: number; lessons: Array<{ id: string; order: number }> }>)
+  const modules = ((courseModules ?? []) as Array<{ id: string; title: string; section: string | null; order: number; lessons: Array<{ id: string; title: string; order: number }> }>)
     .sort((a, b) => a.order - b.order)
   const parentModule = modules.find((m) => m.id === moduleId)
   const sortedModuleLessons = [...(parentModule?.lessons ?? [])].sort((a, b) => a.order - b.order)
@@ -130,12 +130,12 @@ export default async function TaskPage({ params }: Props) {
 
   return (
     <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
-      <LessonTaskSidebar
+      <CourseSidebar
         courseId={courseId}
-        lessonId={lessonId}
-        lessonTitle={lesson?.title ?? 'Lesson'}
-        tasks={sortedLessonTasks as Array<{ id: string; title: string; instructions: string | null; order: number; time_limit_seconds: number | null }>}
+        modules={modules}
+        currentLessonId={lessonId}
         currentTaskId={taskId}
+        tasks={sortedLessonTasks}
         submittedTaskIds={submittedTaskIds}
       />
 
