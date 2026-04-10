@@ -119,16 +119,17 @@ export function CourseSidebar({
     ? sorted.find((m) => m.lessons?.some((l) => l.id === resolvedLessonId))?.id
     : undefined
 
-  // Group consecutive modules by section label
-  const groups: { section: string | null; items: Module[] }[] = []
+  // Group all modules by section label, preserving first-appearance order of sections
+  const sectionOrder: (string | null)[] = []
+  const sectionMap = new Map<string | null, Module[]>()
   for (const mod of sorted) {
-    const last = groups[groups.length - 1]
-    if (last && last.section === mod.section) {
-      last.items.push(mod)
-    } else {
-      groups.push({ section: mod.section, items: [mod] })
+    if (!sectionMap.has(mod.section)) {
+      sectionOrder.push(mod.section)
+      sectionMap.set(mod.section, [])
     }
+    sectionMap.get(mod.section)!.push(mod)
   }
+  const groups = sectionOrder.map((section) => ({ section, items: sectionMap.get(section)! }))
 
   // ── Collapsed state ──────────────────────────────────────────────────────────
   if (isCollapsed) {
