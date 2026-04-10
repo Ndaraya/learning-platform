@@ -60,7 +60,8 @@ function IconChevronDown() {
   )
 }
 
-const STORAGE_KEY = 'course-sidebar-collapsed'
+const STORAGE_COLLAPSED = 'course-sidebar-collapsed'
+const STORAGE_LAST_LESSON = 'course-sidebar-last-lesson'
 
 export function CourseSidebar({
   courseId,
@@ -70,32 +71,44 @@ export function CourseSidebar({
   tasks = [],
   submittedTaskIds = [],
 }: Props) {
-  // Start expanded to match server render; sync from localStorage after hydration
   const [isCollapsed, setIsCollapsed] = useState(false)
+  // resolvedLessonId: use the prop when known, otherwise fall back to last-stored lesson
+  const [resolvedLessonId, setResolvedLessonId] = useState(currentLessonId)
 
   useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) === 'true') {
+    // Restore collapsed state
+    if (localStorage.getItem(STORAGE_COLLAPSED) === 'true') {
       setIsCollapsed(true)
     }
-  }, [])
+
+    if (currentLessonId) {
+      // On lesson/task pages: persist the current lesson so course overview can restore it
+      localStorage.setItem(STORAGE_LAST_LESSON, currentLessonId)
+      setResolvedLessonId(currentLessonId)
+    } else {
+      // On course overview (no currentLessonId prop): restore last-visited lesson
+      const stored = localStorage.getItem(STORAGE_LAST_LESSON)
+      if (stored) setResolvedLessonId(stored)
+    }
+  }, [currentLessonId])
 
   const collapse = () => {
     setIsCollapsed(true)
-    localStorage.setItem(STORAGE_KEY, 'true')
+    localStorage.setItem(STORAGE_COLLAPSED, 'true')
   }
 
   const expand = () => {
     setIsCollapsed(false)
-    localStorage.setItem(STORAGE_KEY, 'false')
+    localStorage.setItem(STORAGE_COLLAPSED, 'false')
   }
 
   const sorted = [...modules].sort((a, b) => a.order - b.order)
   const submittedSet = new Set(submittedTaskIds)
   const sortedTasks = [...tasks].sort((a, b) => a.order - b.order)
 
-  const activeModuleId = currentLessonId
-    ? sorted.find((m) => m.lessons?.some((l) => l.id === currentLessonId))?.id
-    : sorted[0]?.id
+  const activeModuleId = resolvedLessonId
+    ? sorted.find((m) => m.lessons?.some((l) => l.id === resolvedLessonId))?.id
+    : undefined
 
   // Group consecutive modules by section label
   const groups: { section: string | null; items: Module[] }[] = []
@@ -113,7 +126,7 @@ export function CourseSidebar({
     return (
       <aside
         className="w-12 shrink-0 border-r bg-white flex flex-col items-center pt-3"
-        style={{ minHeight: 'calc(100vh - 4rem)' }}
+        style={{ height: 'calc(100vh - 4rem)' }}
         aria-label="Course navigation (collapsed)"
       >
         <button
@@ -129,16 +142,17 @@ export function CourseSidebar({
   }
 
   // ── Expanded state ───────────────────────────────────────────────────────────
+  // Fixed height + only the nav scrolls — keeps the collapse button always visible
   let globalIndex = 0
 
   return (
     <aside
       className="w-64 border-r bg-white shrink-0 flex flex-col"
-      style={{ maxHeight: 'calc(100vh - 4rem)', overflowY: 'auto' }}
+      style={{ height: 'calc(100vh - 4rem)' }}
       aria-label="Course navigation"
     >
-      {/* Header: logo + collapse button — sticky so it stays visible while scrolling */}
-      <div className="px-4 py-3 border-b shrink-0 flex items-center justify-between sticky top-0 bg-white z-10">
+      {/* Header — always visible; nav below is the only scrolling region */}
+      <div className="px-4 py-3 border-b shrink-0 flex items-center justify-between bg-white">
         <Link href={`/courses/${courseId}`} aria-label="Back to course overview">
           <div
             className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
@@ -158,8 +172,8 @@ export function CourseSidebar({
         </button>
       </div>
 
-      {/* Module / lesson / task tree */}
-      <nav className="flex-1 py-3 px-2" aria-label="Course modules">
+      {/* Scrollable module / lesson / task tree */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2" aria-label="Course modules">
         <ol className="space-y-1 list-none p-0 m-0">
           {groups.map((group, groupIdx) => {
             const sectionStart = globalIndex
@@ -213,8 +227,7 @@ export function CourseSidebar({
                             className="mt-1 ml-5 mb-2 space-y-0.5 border-l border-gray-100 pl-3 list-none p-0 m-0"
                           >
                             {sortedLessons.map((lesson, j) => {
-                              const isCurrent = lesson.id === currentLessonId
-                              // Highlight the lesson row differently when we're inside a task vs on the lesson overview
+                              const isCurrent = lesson.id === resolvedLessonId
                               const lessonIsActiveWithoutTask = isCurrent && !currentTaskId
                               const lessonIsActiveWithTask = isCurrent && !!currentTaskId
 
@@ -237,7 +250,7 @@ export function CourseSidebar({
                                     {lesson.title}
                                   </Link>
 
-                                  {/* Task sub-list — only rendered under the current lesson on task pages */}
+                                  {/* Task sub-list — only under the current lesson on task pages */}
                                   {isCurrent && sortedTasks.length > 0 && (
                                     <ul className="mt-0.5 ml-3 border-l border-gray-100 pl-2.5 space-y-0.5 list-none p-0 pb-1">
                                       {sortedTasks.map((task, ti) => {
