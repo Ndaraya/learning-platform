@@ -83,7 +83,7 @@ export default async function LessonPage({ params }: Props) {
   }
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+    <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
       <CourseSidebar courseId={courseId} modules={modules} currentLessonId={lessonId} />
 
       <div className="flex-1 overflow-y-auto">

@@ -129,7 +129,7 @@ export default async function TaskPage({ params }: Props) {
   const nextLessonHref = nextLessonId ? `/courses/${courseId}/lessons/${nextLessonId}` : null
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+    <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
       <CourseSidebar
         courseId={courseId}
         modules={modules}

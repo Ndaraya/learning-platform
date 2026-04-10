@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 interface Task {
@@ -74,6 +74,8 @@ export function CourseSidebar({
   const [isCollapsed, setIsCollapsed] = useState(false)
   // resolvedLessonId: use the prop when known, otherwise fall back to last-stored lesson
   const [resolvedLessonId, setResolvedLessonId] = useState(currentLessonId)
+  // Ref to the active lesson link so we can scroll it into view
+  const activeItemRef = useRef<HTMLAnchorElement | null>(null)
 
   useEffect(() => {
     // Restore collapsed state
@@ -91,6 +93,13 @@ export function CourseSidebar({
       if (stored) setResolvedLessonId(stored)
     }
   }, [currentLessonId])
+
+  // After resolvedLessonId is set/restored, scroll the active lesson into view
+  useEffect(() => {
+    if (activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({ block: 'nearest', behavior: 'auto' })
+    }
+  }, [resolvedLessonId])
 
   const collapse = () => {
     setIsCollapsed(true)
@@ -235,6 +244,7 @@ export function CourseSidebar({
                                 <li key={lesson.id}>
                                   {/* Lesson row */}
                                   <Link
+                                    ref={isCurrent ? activeItemRef : null}
                                     href={`/courses/${courseId}/lessons/${lesson.id}`}
                                     className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
                                     style={

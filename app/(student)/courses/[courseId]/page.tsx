@@ -58,7 +58,7 @@ export default async function CourseDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="flex" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+    <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
       {/* Left sidebar */}
       <CourseSidebar courseId={courseId} modules={modules} />
 
