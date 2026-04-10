@@ -188,16 +188,23 @@ export function CourseSidebar({
             const sectionStart = globalIndex
             globalIndex += group.items.length
 
+            const sectionIsActive = group.items.some((m) => m.id === activeModuleId)
+
             return (
               <li key={groupIdx}>
-                {group.section && (
-                  <p className="px-2 pt-3 pb-1 text-xs font-bold uppercase tracking-wider text-gray-400 select-none first:pt-1">
-                    {group.section}
-                  </p>
-                )}
+                {group.section ? (
+                  <details open={sectionIsActive} className="group/section">
+                    <summary className="flex items-center justify-between px-2 pt-3 pb-1 cursor-pointer list-none select-none">
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                        {group.section}
+                      </span>
+                      <span className="shrink-0 text-gray-400 transition-transform group-open/section:rotate-180">
+                        <IconChevronDown />
+                      </span>
+                    </summary>
 
-                <ol className="space-y-1 list-none p-0 m-0">
-                  {group.items.map((module, i) => {
+                    <ol className="space-y-1 list-none p-0 m-0">
+                      {group.items.map((module, i) => {
                     const moduleIdx = sectionStart + i
                     const isActive = module.id === activeModuleId
                     const sortedLessons = [...(module.lessons ?? [])].sort((a, b) => a.order - b.order)
@@ -309,7 +316,65 @@ export function CourseSidebar({
                       </li>
                     )
                   })}
-                </ol>
+                    </ol>
+                  </details>
+                ) : (
+                  <ol className="space-y-1 list-none p-0 m-0">
+                    {group.items.map((module, i) => {
+                      const moduleIdx = sectionStart + i
+                      const isActive = module.id === activeModuleId
+                      const sortedLessons = [...(module.lessons ?? [])].sort((a, b) => a.order - b.order)
+                      return (
+                        <li key={module.id}>
+                          <details open={isActive} className="group">
+                            <summary
+                              className="flex items-center gap-3 rounded-lg px-2 py-2.5 cursor-pointer list-none select-none transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
+                              style={{ outlineColor: 'var(--brand)' }}
+                            >
+                              <span
+                                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold"
+                                style={
+                                  isActive
+                                    ? { borderColor: 'var(--brand)', backgroundColor: 'var(--brand)', color: 'white' }
+                                    : { borderColor: '#d1d5db', color: '#6b7280' }
+                                }
+                                aria-hidden="true"
+                              >
+                                {moduleIdx + 1}
+                              </span>
+                              <span
+                                className="flex-1 text-sm font-medium leading-snug"
+                                style={isActive ? { color: 'var(--brand)' } : { color: '#374151' }}
+                              >
+                                {module.title}
+                              </span>
+                              <span className="shrink-0 text-gray-400 transition-transform group-open:rotate-180">
+                                <IconChevronDown />
+                              </span>
+                            </summary>
+                            <ul role="list" className="mt-1 ml-5 mb-2 space-y-0.5 border-l border-gray-100 pl-3 list-none p-0 m-0">
+                              {sortedLessons.map((lesson, j) => {
+                                const isCurrent = lesson.id === resolvedLessonId
+                                return (
+                                  <li key={lesson.id}>
+                                    <Link
+                                      href={`/courses/${courseId}/lessons/${lesson.id}`}
+                                      className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline"
+                                      style={isCurrent ? { backgroundColor: 'var(--brand)', color: 'white', fontWeight: 600 } : { color: '#4b5563' }}
+                                    >
+                                      <span className="opacity-50 mr-1">{moduleIdx + 1}.{j + 1}</span>
+                                      {lesson.title}
+                                    </Link>
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </details>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                )}
               </li>
             )
           })}
