@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import katex from 'katex'
 
 interface Question {
   id: string
@@ -46,15 +47,95 @@ interface Props {
   nextLabel: string
 }
 
+/** Renders a KaTeX expression; falls back to the raw string on error */
+function KaTeXSpan({ latex, display = false }: { latex: string; display?: boolean }) {
+  try {
+    const html = katex.renderToString(latex, { displayMode: display, throwOnError: false })
+    return <span dangerouslySetInnerHTML={{ __html: html }} />
+  } catch {
+    return <span>{latex}</span>
+  }
+}
+
+/** Renders an HTML table converted from markdown by the import script */
+function PromptHtmlTable({ html }: { html: string }) {
+  const rows: { cells: string[]; isHeader: boolean }[] = []
+  const trPattern = /<tr>([\s\S]*?)<\/tr>/g
+  let trMatch
+  while ((trMatch = trPattern.exec(html)) !== null) {
+    const rowHtml = trMatch[1]
+    const isHeader = rowHtml.includes('<th>')
+    const cellPattern = /<t[hd]>([\s\S]*?)<\/t[hd]>/g
+    const cells: string[] = []
+    let cellMatch
+    while ((cellMatch = cellPattern.exec(rowHtml)) !== null) {
+      cells.push(cellMatch[1])
+    }
+    rows.push({ cells, isHeader })
+  }
+  return (
+    <div className="overflow-x-auto my-3">
+      <table className="border-collapse text-xs">
+        <tbody>
+          {rows.map((row, ri) =>
+            row.isHeader ? (
+              <tr key={ri} className="bg-gray-100">
+                {row.cells.map((cell, ci) => (
+                  <th key={ci} className="border border-gray-300 px-2 py-1 font-semibold text-left">{cell}</th>
+                ))}
+              </tr>
+            ) : (
+              <tr key={ri} className="even:bg-gray-50">
+                {row.cells.map((cell, ci) => (
+                  <td key={ci} className="border border-gray-300 px-2 py-1">{cell}</td>
+                ))}
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/**
+ * Renders inline content: $$...$$ (display math), $...$ (inline math),
+ * <u>...</u> (underline), and plain text.
+ */
+function PromptInline({ text }: { text: string }) {
+  const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[^$\n]+\$|<u>[\s\S]*?<\/u>)/)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('$$') && part.endsWith('$$'))
+          return <KaTeXSpan key={i} latex={part.slice(2, -2)} display />
+        if (part.startsWith('$') && part.endsWith('$'))
+          return <KaTeXSpan key={i} latex={part.slice(1, -1)} />
+        const uMatch = part.match(/^<u>([\s\S]*?)<\/u>$/)
+        if (uMatch) return <u key={i}>{uMatch[1]}</u>
+        return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
+/** Top-level prompt renderer: handles <table> blocks then delegates inline content */
 function PromptText({ text }: { text: string }) {
-  // Split on <u>...</u> tags so underlined ACT passage text renders with an actual underline
-  const parts = text.split(/(<u>[\s\S]*?<\/u>)/)
+  if (text.includes('<table>')) {
+    const parts = text.split(/(<table>[\s\S]*?<\/table>)/)
+    return (
+      <span style={{ whiteSpace: 'pre-line' }}>
+        {parts.map((part, i) =>
+          part.startsWith('<table>')
+            ? <PromptHtmlTable key={i} html={part} />
+            : <PromptInline key={i} text={part} />
+        )}
+      </span>
+    )
+  }
   return (
     <span style={{ whiteSpace: 'pre-line' }}>
-      {parts.map((part, i) => {
-        const match = part.match(/^<u>([\s\S]*?)<\/u>$/)
-        return match ? <u key={i}>{match[1]}</u> : <span key={i}>{part}</span>
-      })}
+      <PromptInline text={text} />
     </span>
   )
 }
@@ -461,7 +542,7 @@ export function TaskRunner({
                             className="accent-primary"
                             aria-label={option}
                           />
-                          <span className="text-sm">{option}</span>
+                          <span className="text-sm"><PromptInline text={option} /></span>
                         </label>
                       )
                     })}

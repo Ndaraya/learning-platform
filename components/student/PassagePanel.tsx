@@ -21,6 +21,25 @@ function PassageBody({ text }: { text: string }) {
   return (
     <>
       {paragraphs.map((para, pi) => {
+        // <pre> blocks — ASCII art figures from science passages
+        if (para.trimStart().startsWith('<pre>')) {
+          const content = para.replace(/<\/?pre>/g, '')
+          return (
+            <pre key={pi} className="text-xs font-mono bg-gray-100 p-3 rounded overflow-x-auto my-3 whitespace-pre leading-tight">
+              {content}
+            </pre>
+          )
+        }
+
+        // Table paragraph — use <div> not <p> (block-level element can't nest inside <p>)
+        if (para.trimStart().startsWith('<table>')) {
+          return (
+            <div key={pi} className="mb-4">
+              <InlineContent text={para} />
+            </div>
+          )
+        }
+
         // Render ## or ### lines as section headings (e.g. "## PASSAGE A: Title")
         const headingMatch = para.match(/^#{2,3}\s+(.+)/)
         if (headingMatch) {
@@ -63,9 +82,9 @@ function InlineContent({ text }: { text: string }) {
   return <InlineTags text={text} />
 }
 
-/** Renders <u> and <b>/<strong> inline tags as React elements */
+/** Renders <u>, <b>/<strong>, and <em> inline tags as React elements */
 function InlineTags({ text }: { text: string }) {
-  const parts = text.split(/(<u>[\s\S]*?<\/u>|<b>[\s\S]*?<\/b>|<strong>[\s\S]*?<\/strong>)/)
+  const parts = text.split(/(<u>[\s\S]*?<\/u>|<b>[\s\S]*?<\/b>|<strong>[\s\S]*?<\/strong>|<em>[\s\S]*?<\/em>)/)
   return (
     <>
       {parts.map((part, i) => {
@@ -74,6 +93,9 @@ function InlineTags({ text }: { text: string }) {
         }
         if (/^<(b|strong)>([\s\S]*?)<\/(b|strong)>$/.test(part)) {
           return <strong key={i}>{part.replace(/<\/?(b|strong)>/g, '')}</strong>
+        }
+        if (/^<em>([\s\S]*?)<\/em>$/.test(part)) {
+          return <em key={i}>{part.replace(/<\/?em>/g, '')}</em>
         }
         return <React.Fragment key={i}>{part}</React.Fragment>
       })}
