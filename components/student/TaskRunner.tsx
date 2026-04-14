@@ -466,15 +466,15 @@ export function TaskRunner({
                     )}
                     {/* MCQ "Why?" on-demand explanation */}
                     {q.type === 'mcq' && (
-                      <div>
+                      <div className="mt-2">
                         {!mcqFeedback[q.id]?.text && (
                           <button
                             type="button"
                             onClick={() => fetchMCQFeedback(q.id, response?.answer ?? '')}
                             disabled={mcqFeedback[q.id]?.loading}
-                            className="text-xs text-primary underline underline-offset-2 hover:opacity-70 disabled:opacity-40"
+                            className="inline-flex items-center gap-1 rounded-md border border-muted-foreground/30 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
                           >
-                            {mcqFeedback[q.id]?.loading ? 'Loading…' : 'Why?'}
+                            {mcqFeedback[q.id]?.loading ? 'Loading…' : '💡 Why is this the answer?'}
                           </button>
                         )}
                         {mcqFeedback[q.id]?.text && (
@@ -485,18 +485,18 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* Full AI tutor explanation after 3+ failed attempts */}
+                    {/* Full explanation after 3+ failed attempts */}
                     {/* questionFailCounts counts PREVIOUS failures; >= 2 means this is the 3rd wrong attempt */}
                     {!correct && (questionFailCounts[q.id] ?? 0) >= 2 && (
-                      <div>
+                      <div className="mt-2">
                         {!explanations[q.id]?.text && (
                           <button
                             type="button"
                             onClick={() => fetchExplanation(q.id, response?.answer ?? '')}
                             disabled={explanations[q.id]?.loading}
-                            className="mt-1 text-xs font-medium text-blue-600 underline underline-offset-2 hover:opacity-70 disabled:opacity-40"
+                            className="inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-40 transition-colors"
                           >
-                            {explanations[q.id]?.loading ? 'Loading walkthrough…' : 'Show full explanation'}
+                            {explanations[q.id]?.loading ? 'Loading walkthrough…' : '📖 Show full explanation'}
                           </button>
                         )}
                         {explanations[q.id]?.text && (

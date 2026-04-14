@@ -105,7 +105,7 @@ export default async function TaskPage({ params }: Props) {
   const questionFailCounts: Record<string, number> = {}
   const previouslyWrongQuestionIds = new Set<string>()
   for (const attempt of gradedAttempts) {
-    for (const qr of attempt.question_responses) {
+    for (const qr of (attempt.question_responses ?? [])) {
       if ((qr.score ?? 0) < qr.max_score) {
         questionFailCounts[qr.question_id] = (questionFailCounts[qr.question_id] ?? 0) + 1
         previouslyWrongQuestionIds.add(qr.question_id)
