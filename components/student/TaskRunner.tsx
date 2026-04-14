@@ -452,8 +452,8 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* Full explanation button — server gates access to 2+ failed attempts */}
-                    {q.type === 'mcq' && !correct && (
+                    {/* Full explanation button — shown after 2nd failure (wrong now + was wrong before) */}
+                    {q.type === 'mcq' && !correct && attemptNumber >= 2 && previouslyWrongQuestionIds.includes(q.id) && (
                       <div className="mt-2">
                         {!explanations[q.id]?.text && (
                           <button
