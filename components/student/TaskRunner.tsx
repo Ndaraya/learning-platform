@@ -45,6 +45,9 @@ interface Props {
   timedMode: 'untimed' | 'practice' | 'exam'
   nextHref: string | null
   nextLabel: string
+  attemptNumber?: number
+  previouslyWrongQuestionIds?: string[]
+  questionFailCounts?: Record<string, number>
 }
 
 /** Renders a KaTeX expression; falls back to the raw string on error */
@@ -163,6 +166,9 @@ const STORAGE_KEY = (taskId: string) => `lp-task-start-${taskId}`
 export function TaskRunner({
   taskId, courseId, lessonId, questions, existingSubmission,
   timeLimitSeconds, timedMode, nextHref, nextLabel,
+  attemptNumber = 1,
+  previouslyWrongQuestionIds = [],
+  questionFailCounts = {},
 }: Props) {
   const router = useRouter()
 
@@ -175,6 +181,13 @@ export function TaskRunner({
   const [submission, setSubmission] = useState<ExistingSubmission | null>(existingSubmission)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Hint state: question id -> { open, loading, text }
+  const [hints, setHints] = useState<Record<string, { open: boolean; loading: boolean; text: string | null }>>({})
+  // On-demand MCQ feedback: question id -> { loading, text }
+  const [mcqFeedback, setMcqFeedback] = useState<Record<string, { loading: boolean; text: string | null }>>({})
+  // Full explanation state: question id -> { loading, text }
+  const [explanations, setExplanations] = useState<Record<string, { loading: boolean; text: string | null }>>({})
 
   // Timer state
   const [timerEnabled, setTimerEnabled] = useState(timedMode === 'exam')
@@ -229,6 +242,62 @@ export function TaskRunner({
     return () => clearInterval(intervalRef.current!)
   }, [shouldShowTimer, timeLeft, submission])
 
+  async function toggleHint(questionId: string) {
+    const current = hints[questionId]
+    if (current?.open) {
+      setHints((prev) => ({ ...prev, [questionId]: { ...prev[questionId], open: false } }))
+      return
+    }
+    if (current?.text) {
+      setHints((prev) => ({ ...prev, [questionId]: { ...prev[questionId], open: true } }))
+      return
+    }
+    setHints((prev) => ({ ...prev, [questionId]: { open: true, loading: true, text: null } }))
+    try {
+      const res = await fetch('/api/question-hint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId }),
+      })
+      const data = await res.json()
+      setHints((prev) => ({ ...prev, [questionId]: { open: true, loading: false, text: data.hint ?? 'No hint available.' } }))
+    } catch {
+      setHints((prev) => ({ ...prev, [questionId]: { open: true, loading: false, text: 'Unable to load hint. Try again.' } }))
+    }
+  }
+
+  async function fetchMCQFeedback(questionId: string, studentAnswer: string) {
+    if (mcqFeedback[questionId]?.text) return
+    setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: true, text: null } }))
+    try {
+      const res = await fetch('/api/question-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, studentAnswer }),
+      })
+      const data = await res.json()
+      setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: false, text: data.feedback ?? 'No explanation available.' } }))
+    } catch {
+      setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: false, text: 'Unable to load explanation. Try again.' } }))
+    }
+  }
+
+  async function fetchExplanation(questionId: string, studentAnswer: string) {
+    if (explanations[questionId]?.text) return
+    setExplanations((prev) => ({ ...prev, [questionId]: { loading: true, text: null } }))
+    try {
+      const res = await fetch('/api/question-explanation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, studentAnswer, taskId }),
+      })
+      const data = await res.json()
+      setExplanations((prev) => ({ ...prev, [questionId]: { loading: false, text: data.explanation ?? 'No explanation available.' } }))
+    } catch {
+      setExplanations((prev) => ({ ...prev, [questionId]: { loading: false, text: 'Unable to load explanation. Try again.' } }))
+    }
+  }
+
   // Auto-submit when exam timer expires
   const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (hasSubmitted.current) return
@@ -255,21 +324,14 @@ export function TaskRunner({
       }
 
       localStorage.removeItem(STORAGE_KEY(taskId))
-      router.refresh()
 
-      const { submissionId, score } = await res.json()
+      const { submissionId, score, questionResponses } = await res.json()
+      router.refresh()
       setSubmission({
         id: submissionId,
         score,
         graded_at: new Date().toISOString(),
-        question_responses: questions.map((q) => ({
-          question_id: q.id,
-          answer: answers[q.id] ?? '',
-          score: null,
-          max_score: q.points,
-          feedback: null,
-          ai_graded: false,
-        })),
+        question_responses: questionResponses,
       })
     } catch (err) {
       hasSubmitted.current = false
@@ -379,6 +441,49 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
+                    {/* MCQ "Why?" on-demand explanation */}
+                    {q.type === 'mcq' && (
+                      <div>
+                        {!mcqFeedback[q.id]?.text && (
+                          <button
+                            type="button"
+                            onClick={() => fetchMCQFeedback(q.id, response?.answer ?? '')}
+                            disabled={mcqFeedback[q.id]?.loading}
+                            className="text-xs text-primary underline underline-offset-2 hover:opacity-70 disabled:opacity-40"
+                          >
+                            {mcqFeedback[q.id]?.loading ? 'Loading…' : 'Why?'}
+                          </button>
+                        )}
+                        {mcqFeedback[q.id]?.text && (
+                          <div className="mt-2 rounded-md bg-muted p-3 text-sm" role="note" aria-label="Answer explanation">
+                            <span className="font-medium">Explanation: </span>
+                            {mcqFeedback[q.id].text}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* Full AI tutor explanation after 3+ failed attempts */}
+                    {/* questionFailCounts counts PREVIOUS failures; >= 2 means this is the 3rd wrong attempt */}
+                    {!correct && (questionFailCounts[q.id] ?? 0) >= 2 && (
+                      <div>
+                        {!explanations[q.id]?.text && (
+                          <button
+                            type="button"
+                            onClick={() => fetchExplanation(q.id, response?.answer ?? '')}
+                            disabled={explanations[q.id]?.loading}
+                            className="mt-1 text-xs font-medium text-blue-600 underline underline-offset-2 hover:opacity-70 disabled:opacity-40"
+                          >
+                            {explanations[q.id]?.loading ? 'Loading walkthrough…' : 'Show full explanation'}
+                          </button>
+                        )}
+                        {explanations[q.id]?.text && (
+                          <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" role="note" aria-label="Full tutor explanation">
+                            <p className="font-semibold mb-1">Let&apos;s work through this together</p>
+                            <p style={{ whiteSpace: 'pre-line' }}>{explanations[q.id].text}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )
@@ -399,6 +504,8 @@ export function TaskRunner({
                 hasSubmitted.current = false
                 setSubmission(null)
                 setAnswers({})
+                setMcqFeedback({})
+                setExplanations({})
                 if (timeLimitSeconds && timedMode !== 'untimed') {
                   localStorage.removeItem(STORAGE_KEY(taskId))
                   setTimeLeft(timeLimitSeconds)
@@ -518,6 +625,25 @@ export function TaskRunner({
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Hint accordion — shown on 2nd+ attempt for previously-wrong questions */}
+              {attemptNumber >= 2 && previouslyWrongQuestionIds.includes(q.id) && (
+                <div className="mb-4">
+                  <button
+                    type="button"
+                    onClick={() => toggleHint(q.id)}
+                    className="flex items-center gap-1.5 text-xs font-medium text-amber-700 hover:text-amber-900 transition-colors"
+                    aria-expanded={hints[q.id]?.open ?? false}
+                  >
+                    <span>{hints[q.id]?.open ? '▾' : '▸'}</span>
+                    <span>Need a hint?</span>
+                  </button>
+                  {hints[q.id]?.open && (
+                    <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="note">
+                      {hints[q.id]?.loading ? 'Loading hint…' : hints[q.id]?.text}
+                    </div>
+                  )}
+                </div>
+              )}
               {q.type === 'mcq' && q.options ? (
                 <fieldset aria-labelledby={`q-${q.id}-label`}>
                   <legend className="sr-only">Question {i + 1}</legend>

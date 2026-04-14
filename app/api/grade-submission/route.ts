@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     // Calculate and store total score
     const { data: questionResponses } = await supabase
       .from('question_responses')
-      .select('score')
+      .select('question_id, answer, score, max_score, feedback, ai_graded')
       .eq('submission_id', submission.id)
 
     const totalScore = (questionResponses ?? []).reduce((sum, r) => sum + (r.score ?? 0), 0)
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ submissionId: submission.id, score: scorePercent })
+    return NextResponse.json({ submissionId: submission.id, score: scorePercent, questionResponses: questionResponses ?? [] })
   } catch (err) {
     console.error('Grade submission error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

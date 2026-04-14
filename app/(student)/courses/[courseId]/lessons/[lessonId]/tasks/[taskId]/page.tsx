@@ -69,7 +69,7 @@ export default async function TaskPage({ params }: Props) {
   const sortedLessonTasks = [...(lessonTasksData ?? [])].sort((a, b) => a.order - b.order)
   const taskIds = sortedLessonTasks.map((t) => t.id)
 
-  const [{ data: existingSubmission }, { data: allSubmissions }] = await Promise.all([
+  const [{ data: existingSubmission }, { data: allSubmissions }, { data: allTaskAttempts }] = await Promise.all([
     supabase
       .from('task_submissions')
       .select('id, score, graded_at, question_responses(question_id, answer, score, max_score, feedback, ai_graded)')
@@ -83,18 +83,46 @@ export default async function TaskPage({ params }: Props) {
       .select('task_id')
       .eq('user_id', user.id)
       .in('task_id', taskIds),
+    supabase
+      .from('task_submissions')
+      .select('id, graded_at, question_responses(question_id, score, max_score)')
+      .eq('user_id', user.id)
+      .eq('task_id', taskId)
+      .order('created_at', { ascending: true }),
   ])
 
   const submittedTaskIds = (allSubmissions ?? []).map((s) => s.task_id as string)
+
+  // Compute attempt number and per-question failure counts from all historical attempts
+  type AttemptRow = {
+    id: string
+    graded_at: string | null
+    question_responses: Array<{ question_id: string; score: number | null; max_score: number }>
+  }
+  const gradedAttempts = ((allTaskAttempts ?? []) as AttemptRow[]).filter((s) => s.graded_at)
+  const attemptNumber = gradedAttempts.length + 1
+
+  const questionFailCounts: Record<string, number> = {}
+  const previouslyWrongQuestionIds = new Set<string>()
+  for (const attempt of gradedAttempts) {
+    for (const qr of attempt.question_responses) {
+      if ((qr.score ?? 0) < qr.max_score) {
+        questionFailCounts[qr.question_id] = (questionFailCounts[qr.question_id] ?? 0) + 1
+        previouslyWrongQuestionIds.add(qr.question_id)
+      }
+    }
+  }
 
   const taskType = (task as { type?: string }).type ?? 'quiz'
   const taskContentBody = (task as { content_body?: string | null }).content_body ?? null
   const taskImageUrls = (task as { image_urls?: string[] }).image_urls ?? []
   const taskContentUrl = (task as { video_url?: string | null }).video_url ?? null
 
-  // Reading passage — present when content_body is set on a quiz task
+  // Reading passage — present when content_body is set on a quiz task that is NOT in the math section
+  const currentModuleSection = ((courseModules ?? []) as Array<{ id: string; section: string | null }>)
+    .find((m) => m.id === (lesson as { module_id?: string } | null)?.module_id)?.section ?? null
   const rawPassage = taskType === 'quiz' ? (taskContentBody ?? null) : null
-  const isReadingLayout = !!rawPassage
+  const isReadingLayout = !!rawPassage && currentModuleSection?.toLowerCase() !== 'math'
   const passageTitle = rawPassage?.match(/^## PASSAGE:\s*(.+)/m)?.[1]?.replace(/\*[^*]*\*/g, '').trim() ?? 'Passage'
   const passageBody = rawPassage?.replace(/^## PASSAGE:[^\n]*\n(\*[^\n]*\*\n)?/m, '').trim() ?? ''
 
@@ -199,6 +227,9 @@ export default async function TaskPage({ params }: Props) {
                     : nextLessonHref ?? `/courses/${courseId}`
                 }
                 nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
+                attemptNumber={attemptNumber}
+                previouslyWrongQuestionIds={[...previouslyWrongQuestionIds]}
+                questionFailCounts={questionFailCounts}
               />
 
               {/* Back / Next navigation */}
@@ -304,6 +335,9 @@ export default async function TaskPage({ params }: Props) {
                     : nextLessonHref ?? `/courses/${courseId}`
                 }
                 nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
+                attemptNumber={attemptNumber}
+                previouslyWrongQuestionIds={[...previouslyWrongQuestionIds]}
+                questionFailCounts={questionFailCounts}
               />
             )}
 
