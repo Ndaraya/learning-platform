@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       .eq('task_submissions.task_id', taskId)
 
     const failCount = (failedResponses ?? []).filter((r) => (r.score ?? 0) < r.max_score).length
-    if (failCount < 3) {
+    if (failCount < 2) {
       return NextResponse.json({ error: 'Not enough attempts' }, { status: 403 })
     }
 

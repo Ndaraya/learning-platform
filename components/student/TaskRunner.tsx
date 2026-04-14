@@ -205,6 +205,10 @@ export function TaskRunner({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Merged fail counts: historical (from server) + current submission failures
+  // Tracked locally so results view is correct immediately without waiting for router.refresh()
+  const [effectiveFailCounts, setEffectiveFailCounts] = useState<Record<string, number>>(questionFailCounts)
+
   // Hint state: question id -> { open, loading, text }
   const [hints, setHints] = useState<Record<string, { open: boolean; loading: boolean; text: string | null }>>({})
   // On-demand MCQ feedback: question id -> { loading, text }
@@ -349,13 +353,25 @@ export function TaskRunner({
       localStorage.removeItem(STORAGE_KEY(taskId))
 
       const { submissionId, score, questionResponses } = await res.json()
-      router.refresh()
+
+      // Merge current submission's failures into the historical counts so the
+      // explanation button is correct immediately (no need to wait for router.refresh)
+      const mergedFailCounts: Record<string, number> = { ...questionFailCounts }
+      for (const qr of (questionResponses ?? [])) {
+        if ((qr.score ?? 0) < (qr.max_score ?? 1)) {
+          mergedFailCounts[qr.question_id] = (mergedFailCounts[qr.question_id] ?? 0) + 1
+        }
+      }
+      setEffectiveFailCounts(mergedFailCounts)
+
       setSubmission({
         id: submissionId,
         score,
         graded_at: new Date().toISOString(),
         question_responses: questionResponses,
       })
+      // Refresh after setting submission so results render first, then server props update
+      router.refresh()
     } catch (err) {
       hasSubmitted.current = false
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
@@ -485,9 +501,8 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* Full explanation after 3+ failed attempts */}
-                    {/* questionFailCounts counts PREVIOUS failures; >= 2 means this is the 3rd wrong attempt */}
-                    {!correct && (questionFailCounts[q.id] ?? 0) >= 2 && (
+                    {/* Full explanation after 2+ failed attempts */}
+                    {!correct && (effectiveFailCounts[q.id] ?? 0) >= 2 && (
                       <div className="mt-2">
                         {!explanations[q.id]?.text && (
                           <button
@@ -529,6 +544,7 @@ export function TaskRunner({
                 setAnswers({})
                 setMcqFeedback({})
                 setExplanations({})
+                setEffectiveFailCounts(questionFailCounts)
                 if (timeLimitSeconds && timedMode !== 'untimed') {
                   localStorage.removeItem(STORAGE_KEY(taskId))
                   setTimeLeft(timeLimitSeconds)
