@@ -207,8 +207,6 @@ export function TaskRunner({
 
   // Hint state: question id -> { open, loading, text }
   const [hints, setHints] = useState<Record<string, { open: boolean; loading: boolean; text: string | null }>>({})
-  // On-demand MCQ feedback: question id -> { loading, text }
-  const [mcqFeedback, setMcqFeedback] = useState<Record<string, { loading: boolean; text: string | null }>>({})
   // Full explanation state: question id -> { loading, text }
   const [explanations, setExplanations] = useState<Record<string, { loading: boolean; text: string | null }>>({})
 
@@ -286,22 +284,6 @@ export function TaskRunner({
       setHints((prev) => ({ ...prev, [questionId]: { open: true, loading: false, text: data.hint ?? 'No hint available.' } }))
     } catch {
       setHints((prev) => ({ ...prev, [questionId]: { open: true, loading: false, text: 'Unable to load hint. Try again.' } }))
-    }
-  }
-
-  async function fetchMCQFeedback(questionId: string, studentAnswer: string) {
-    if (mcqFeedback[questionId]?.text) return
-    setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: true, text: null } }))
-    try {
-      const res = await fetch('/api/question-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, studentAnswer }),
-      })
-      const data = await res.json()
-      setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: false, text: data.feedback ?? 'No explanation available.' } }))
-    } catch {
-      setMcqFeedback((prev) => ({ ...prev, [questionId]: { loading: false, text: 'Unable to load explanation. Try again.' } }))
     }
   }
 
@@ -470,27 +452,6 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* MCQ "Why?" on-demand explanation */}
-                    {q.type === 'mcq' && (
-                      <div className="mt-2">
-                        {!mcqFeedback[q.id]?.text && (
-                          <button
-                            type="button"
-                            onClick={() => fetchMCQFeedback(q.id, response?.answer ?? '')}
-                            disabled={mcqFeedback[q.id]?.loading}
-                            className="inline-flex items-center gap-1 rounded-md border border-muted-foreground/30 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
-                          >
-                            {mcqFeedback[q.id]?.loading ? 'Loading…' : '💡 Why is this the answer?'}
-                          </button>
-                        )}
-                        {mcqFeedback[q.id]?.text && (
-                          <div className="mt-2 rounded-md bg-muted p-3 text-sm" role="note" aria-label="Answer explanation">
-                            <span className="font-medium">Explanation: </span>
-                            {mcqFeedback[q.id].text}
-                          </div>
-                        )}
-                      </div>
-                    )}
                     {/* Full explanation button — server gates access to 2+ failed attempts */}
                     {q.type === 'mcq' && !correct && (
                       <div className="mt-2">
@@ -532,7 +493,6 @@ export function TaskRunner({
                 hasSubmitted.current = false
                 setSubmission(null)
                 setAnswers({})
-                setMcqFeedback({})
                 setExplanations({})
                 if (timeLimitSeconds && timedMode !== 'untimed') {
                   localStorage.removeItem(STORAGE_KEY(taskId))
