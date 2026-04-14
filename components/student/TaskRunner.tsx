@@ -163,6 +163,29 @@ function formatTime(seconds: number): string {
 
 const STORAGE_KEY = (taskId: string) => `lp-task-start-${taskId}`
 
+const DISPLAY_LETTERS = ['A', 'B', 'C', 'D', 'E']
+
+/**
+ * Deterministic shuffle using a string seed.
+ * Same seed always produces the same order, different seeds produce different orders.
+ * Used to shuffle MCQ options per question per attempt without storing shuffle state.
+ */
+function seededShuffle<T>(arr: T[], seed: string): T[] {
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+    hash |= 0
+  }
+  const result = [...arr]
+  for (let i = result.length - 1; i > 0; i--) {
+    hash = ((hash << 5) - hash) + i
+    hash |= 0
+    const j = Math.abs(hash) % (i + 1)
+    ;[result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
+}
+
 export function TaskRunner({
   taskId, courseId, lessonId, questions, existingSubmission,
   timeLimitSeconds, timedMode, nextHref, nextLabel,
@@ -422,13 +445,13 @@ export function TaskRunner({
                   <CardContent className="space-y-2 text-sm">
                     <div>
                       <span className="text-muted-foreground font-medium">Your answer: </span>
-                      <span>{response?.answer || '—'}</span>
+                      <span>{response?.answer?.replace(/^[A-D]\)\s*/, '') || '—'}</span>
                     </div>
                     {q.type === 'mcq' && !correct && (
                       <div>
                         <span className="text-muted-foreground font-medium">Correct answer: </span>
                         <span className="text-green-700 dark:text-green-400">
-                          {response?.feedback?.replace('The correct answer was: ', '') ?? ''}
+                          {(response?.feedback?.replace('The correct answer was: ', '') ?? '').replace(/^[A-D]\)\s*/, '')}
                         </span>
                       </div>
                     )}
@@ -648,7 +671,9 @@ export function TaskRunner({
                 <fieldset aria-labelledby={`q-${q.id}-label`}>
                   <legend className="sr-only">Question {i + 1}</legend>
                   <div className="space-y-2">
-                    {q.options.map((option, oi) => {
+                    {seededShuffle(q.options, `${q.id}-${attemptNumber}`).map((option, oi) => {
+                      const content = option.replace(/^[A-D]\)\s*/, '')
+                      const displayText = `${DISPLAY_LETTERS[oi]}) ${content}`
                       const inputId = `q-${q.id}-opt-${oi}`
                       return (
                         <label
@@ -666,9 +691,9 @@ export function TaskRunner({
                             checked={answers[q.id] === option}
                             onChange={() => setAnswer(q.id, option)}
                             className="accent-primary"
-                            aria-label={option}
+                            aria-label={displayText}
                           />
-                          <span className="text-sm"><PromptInline text={option} /></span>
+                          <span className="text-sm"><PromptInline text={displayText} /></span>
                         </label>
                       )
                     })}
