@@ -433,13 +433,13 @@ export function TaskRunner({
                   <CardContent className="space-y-2 text-sm">
                     <div>
                       <span className="text-muted-foreground font-medium">Your answer: </span>
-                      <span>{response?.answer?.replace(/^[A-D]\)\s*/, '') || '—'}</span>
+                      <PromptInline text={response?.answer?.replace(/^[A-D]\)\s*/, '') || '—'} />
                     </div>
                     {q.type === 'mcq' && !correct && (
                       <div>
                         <span className="text-muted-foreground font-medium">Correct answer: </span>
                         <span className="text-green-700 dark:text-green-400">
-                          {(response?.feedback?.replace('The correct answer was: ', '') ?? '').replace(/^[A-D]\)\s*/, '')}
+                          <PromptInline text={(response?.feedback?.replace('The correct answer was: ', '') ?? '').replace(/^[A-D]\)\s*/, '')} />
                         </span>
                       </div>
                     )}
