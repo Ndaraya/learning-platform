@@ -468,7 +468,7 @@ export function TaskRunner({
                         {explanations[q.id]?.text && (
                           <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" role="note" aria-label="Full tutor explanation">
                             <p className="font-semibold mb-1">Let&apos;s work through this together</p>
-                            <p style={{ whiteSpace: 'pre-line' }}>{explanations[q.id].text}</p>
+                            <PromptText text={explanations[q.id].text ?? ''} />
                           </div>
                         )}
                       </div>
