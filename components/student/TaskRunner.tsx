@@ -205,10 +205,6 @@ export function TaskRunner({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Merged fail counts: historical (from server) + current submission failures
-  // Tracked locally so results view is correct immediately without waiting for router.refresh()
-  const [effectiveFailCounts, setEffectiveFailCounts] = useState<Record<string, number>>(questionFailCounts)
-
   // Hint state: question id -> { open, loading, text }
   const [hints, setHints] = useState<Record<string, { open: boolean; loading: boolean; text: string | null }>>({})
   // On-demand MCQ feedback: question id -> { loading, text }
@@ -318,6 +314,10 @@ export function TaskRunner({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionId, studentAnswer, taskId }),
       })
+      if (res.status === 403) {
+        setExplanations((prev) => ({ ...prev, [questionId]: { loading: false, text: 'Try this question one more time before the full walkthrough unlocks.' } }))
+        return
+      }
       const data = await res.json()
       setExplanations((prev) => ({ ...prev, [questionId]: { loading: false, text: data.explanation ?? 'No explanation available.' } }))
     } catch {
@@ -353,16 +353,6 @@ export function TaskRunner({
       localStorage.removeItem(STORAGE_KEY(taskId))
 
       const { submissionId, score, questionResponses } = await res.json()
-
-      // Merge current submission's failures into the historical counts so the
-      // explanation button is correct immediately (no need to wait for router.refresh)
-      const mergedFailCounts: Record<string, number> = { ...questionFailCounts }
-      for (const qr of (questionResponses ?? [])) {
-        if ((qr.score ?? 0) < (qr.max_score ?? 1)) {
-          mergedFailCounts[qr.question_id] = (mergedFailCounts[qr.question_id] ?? 0) + 1
-        }
-      }
-      setEffectiveFailCounts(mergedFailCounts)
 
       setSubmission({
         id: submissionId,
@@ -501,8 +491,8 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* Full explanation after 2+ failed attempts */}
-                    {!correct && (effectiveFailCounts[q.id] ?? 0) >= 2 && (
+                    {/* Full explanation button — server gates access to 2+ failed attempts */}
+                    {q.type === 'mcq' && !correct && (
                       <div className="mt-2">
                         {!explanations[q.id]?.text && (
                           <button
@@ -544,7 +534,6 @@ export function TaskRunner({
                 setAnswers({})
                 setMcqFeedback({})
                 setExplanations({})
-                setEffectiveFailCounts(questionFailCounts)
                 if (timeLimitSeconds && timedMode !== 'untimed') {
                   localStorage.removeItem(STORAGE_KEY(taskId))
                   setTimeLeft(timeLimitSeconds)
