@@ -75,17 +75,19 @@ export default async function TaskPage({ params }: Props) {
       .select('id, score, graded_at, question_responses(question_id, answer, score, max_score, feedback, ai_graded)')
       .eq('user_id', user.id)
       .eq('task_id', taskId)
+      .not('graded_at', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single(),
+      .maybeSingle(),
     supabase
       .from('task_submissions')
       .select('task_id')
       .eq('user_id', user.id)
-      .in('task_id', taskIds),
+      .in('task_id', taskIds)
+      .not('graded_at', 'is', null),
     supabase
       .from('task_submissions')
-      .select('id, graded_at, question_responses(question_id, score, max_score)')
+      .select('id, graded_at, cycle_start, question_responses(question_id, score, max_score)')
       .eq('user_id', user.id)
       .eq('task_id', taskId)
       .order('created_at', { ascending: true }),
@@ -93,22 +95,55 @@ export default async function TaskPage({ params }: Props) {
 
   const submittedTaskIds = (allSubmissions ?? []).map((s) => s.task_id as string)
 
-  // Compute attempt number and per-question failure counts from all historical attempts
+  // Compute cycle-aware attempt data from all historical submissions
   type AttemptRow = {
     id: string
     graded_at: string | null
+    cycle_start: boolean
     question_responses: Array<{ question_id: string; score: number | null; max_score: number }>
   }
   const gradedAttempts = ((allTaskAttempts ?? []) as AttemptRow[]).filter((s) => s.graded_at)
   const attemptNumber = gradedAttempts.length + 1
 
-  const questionFailCounts: Record<string, number> = {}
+  // Find the start of the current cycle (most recent cycle_start row)
+  let cycleStartIdx = gradedAttempts.length - 1
+  while (cycleStartIdx > 0 && !gradedAttempts[cycleStartIdx].cycle_start) {
+    cycleStartIdx--
+  }
+  const currentCycleAttempts = gradedAttempts.length > 0 ? gradedAttempts.slice(cycleStartIdx) : []
+  const cycleAttemptNumber = currentCycleAttempts.length
+
+  // Wrong questions scoped to the first attempt of the current cycle only
   const previouslyWrongQuestionIds = new Set<string>()
+  const cycleAttempt1 = currentCycleAttempts[0]
+  if (cycleAttempt1) {
+    for (const qr of (cycleAttempt1.question_responses ?? [])) {
+      if ((qr.score ?? 0) < qr.max_score) {
+        previouslyWrongQuestionIds.add(qr.question_id)
+      }
+    }
+  }
+
+  // Cycle is complete after 2 attempts, or after a perfect first attempt
+  const cycleComplete = cycleAttemptNumber >= 2 ||
+    (cycleAttemptNumber === 1 &&
+      (cycleAttempt1?.question_responses ?? []).length > 0 &&
+      (cycleAttempt1?.question_responses ?? []).every((qr) => (qr.score ?? 0) >= qr.max_score))
+
+  // Correct answers from the latest submission — used as fallback payload on retake
+  const previousAnswersByQuestionId: Record<string, string> = {}
+  for (const r of (existingSubmission?.question_responses ?? [])) {
+    if ((r.score ?? 0) >= r.max_score) {
+      previousAnswersByQuestionId[r.question_id] = r.answer
+    }
+  }
+
+  // Keep legacy fail-count map for potential future use
+  const questionFailCounts: Record<string, number> = {}
   for (const attempt of gradedAttempts) {
     for (const qr of (attempt.question_responses ?? [])) {
       if ((qr.score ?? 0) < qr.max_score) {
         questionFailCounts[qr.question_id] = (questionFailCounts[qr.question_id] ?? 0) + 1
-        previouslyWrongQuestionIds.add(qr.question_id)
       }
     }
   }
@@ -229,7 +264,8 @@ export default async function TaskPage({ params }: Props) {
                 nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
                 attemptNumber={attemptNumber}
                 previouslyWrongQuestionIds={[...previouslyWrongQuestionIds]}
-                questionFailCounts={questionFailCounts}
+                cycleComplete={cycleComplete}
+                previousAnswersByQuestionId={previousAnswersByQuestionId}
               />
 
               {/* Back / Next navigation */}
@@ -337,7 +373,8 @@ export default async function TaskPage({ params }: Props) {
                 nextLabel={nextTaskId ? 'Next task' : nextLessonHref ? 'Next lesson' : 'Back to course'}
                 attemptNumber={attemptNumber}
                 previouslyWrongQuestionIds={[...previouslyWrongQuestionIds]}
-                questionFailCounts={questionFailCounts}
+                cycleComplete={cycleComplete}
+                previousAnswersByQuestionId={previousAnswersByQuestionId}
               />
             )}
 
