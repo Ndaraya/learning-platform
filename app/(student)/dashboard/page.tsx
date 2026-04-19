@@ -304,7 +304,7 @@ export default async function StudentDashboardPage({ searchParams }: Props) {
       {/* Score Forecast — below the top row */}
       {activeEnrollments.length > 0 && (
         <section aria-labelledby="projections-heading">
-          <h2 id="projections-heading" className="text-xl font-semibold mb-4">Progress Tracker</h2>
+          <h2 id="projections-heading" className="text-xl font-semibold mb-4">Momentum Tracker</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {activeEnrollments.map((enrollment) => {
               const course = enrollment.courses as unknown as { title: string; description: string | null } | null

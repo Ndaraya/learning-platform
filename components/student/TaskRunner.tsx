@@ -47,7 +47,8 @@ interface Props {
   nextLabel: string
   attemptNumber?: number
   previouslyWrongQuestionIds?: string[]
-  questionFailCounts?: Record<string, number>
+  cycleComplete?: boolean
+  previousAnswersByQuestionId?: Record<string, string>
 }
 
 /** Renders a KaTeX expression; falls back to the raw string on error */
@@ -191,7 +192,8 @@ export function TaskRunner({
   timeLimitSeconds, timedMode, nextHref, nextLabel,
   attemptNumber = 1,
   previouslyWrongQuestionIds = [],
-  questionFailCounts = {},
+  cycleComplete = false,
+  previousAnswersByQuestionId = {},
 }: Props) {
   const router = useRouter()
 
@@ -205,10 +207,9 @@ export function TaskRunner({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Hint state: question id -> { open, loading, text }
   const [hints, setHints] = useState<Record<string, { open: boolean; loading: boolean; text: string | null }>>({})
-  // Full explanation state: question id -> { loading, text }
   const [explanations, setExplanations] = useState<Record<string, { loading: boolean; text: string | null }>>({})
+  const [retakeMode, setRetakeMode] = useState<null | 'missed' | 'newCycle'>(null)
 
   // Timer state
   const [timerEnabled, setTimerEnabled] = useState(timedMode === 'exam')
@@ -218,6 +219,12 @@ export function TaskRunner({
   const hasSubmitted = useRef(false)
 
   const shouldShowTimer = timeLimitSeconds !== null && timedMode !== 'untimed' && timerEnabled
+
+  const visibleQuestions = retakeMode === 'missed'
+    ? questions.filter((q) => previouslyWrongQuestionIds.includes(q.id))
+    : questions
+
+  const showCycleEndResults = cycleComplete || retakeMode === 'missed'
 
   // Initialize timer from localStorage or fresh
   useEffect(() => {
@@ -307,7 +314,6 @@ export function TaskRunner({
     }
   }
 
-  // Auto-submit when exam timer expires
   const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (hasSubmitted.current) return
     hasSubmitted.current = true
@@ -320,9 +326,10 @@ export function TaskRunner({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           taskId,
+          cycleStart: retakeMode === 'newCycle',
           responses: questions.map((q) => ({
             questionId: q.id,
-            answer: answers[q.id] ?? '',
+            answer: answers[q.id] ?? previousAnswersByQuestionId[q.id] ?? '',
           })),
         }),
       })
@@ -342,7 +349,6 @@ export function TaskRunner({
         graded_at: new Date().toISOString(),
         question_responses: questionResponses,
       })
-      // Refresh after setting submission so results render first, then server props update
       router.refresh()
     } catch (err) {
       hasSubmitted.current = false
@@ -350,7 +356,7 @@ export function TaskRunner({
     } finally {
       setLoading(false)
     }
-  }, [taskId, questions, answers, router])
+  }, [taskId, questions, answers, router, retakeMode, previousAnswersByQuestionId])
 
   useEffect(() => {
     if (timeExpired && timedMode === 'exam' && !submission && !hasSubmitted.current) {
@@ -358,8 +364,24 @@ export function TaskRunner({
     }
   }, [timeExpired, timedMode, submission, handleSubmit])
 
-  const answered = questions.filter((q) => answers[q.id]?.trim()).length
-  const allAnswered = answered === questions.length
+  useEffect(() => {
+    if (!showCycleEndResults || !submission?.graded_at) return
+    const map = Object.fromEntries(
+      (submission.question_responses ?? []).map((r) => [r.question_id, r])
+    )
+    const wrongMcqs = questions.filter((q) => {
+      if (q.type !== 'mcq') return false
+      const r = map[q.id]
+      return r && (r.score ?? 0) < r.max_score
+    })
+    if (wrongMcqs.length === 0) return
+    for (const q of wrongMcqs) {
+      fetchExplanation(q.id, map[q.id].answer ?? '')
+    }
+  }, [submission?.id, retakeMode, cycleComplete]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const answered = visibleQuestions.filter((q) => answers[q.id]?.trim()).length
+  const allAnswered = answered === visibleQuestions.length
   const hasResults = submission !== null
 
   function setAnswer(questionId: string, value: string) {
@@ -372,7 +394,21 @@ export function TaskRunner({
     setTimeLeft(timeLimitSeconds!)
   }
 
-  // Timer color
+  function resetForRetake(mode: 'missed' | 'newCycle') {
+    hasSubmitted.current = false
+    setSubmission(null)
+    setAnswers({})
+    setExplanations({})
+    setHints({})
+    setRetakeMode(mode)
+    if (timeLimitSeconds && timedMode !== 'untimed') {
+      localStorage.removeItem(STORAGE_KEY(taskId))
+      setTimeLeft(timeLimitSeconds)
+      setTimeExpired(false)
+      setTimerEnabled(timedMode === 'exam')
+    }
+  }
+
   const timerColor =
     timeLeft !== null && timeLimitSeconds !== null
       ? timeLeft <= 60 ? 'text-red-600'
@@ -425,7 +461,17 @@ export function TaskRunner({
                       <CardTitle className="text-sm font-medium leading-snug">
                         Q{i + 1}. <PromptText text={q.prompt} />
                       </CardTitle>
-                      <Badge variant={correct ? 'default' : 'secondary'} className="shrink-0" aria-label={`Score: ${scoreLabel}`}>
+                      <Badge
+                        variant="outline"
+                        className={`shrink-0 font-semibold ${
+                          earned === null
+                            ? 'border-gray-300 text-gray-500'
+                            : correct
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-red-500 bg-red-50 text-red-700'
+                        }`}
+                        aria-label={`Score: ${scoreLabel}`}
+                      >
                         {scoreLabel}
                       </Badge>
                     </div>
@@ -435,7 +481,7 @@ export function TaskRunner({
                       <span className="text-muted-foreground font-medium">Your answer: </span>
                       <PromptInline text={response?.answer?.replace(/^[A-D]\)\s*/, '') || '—'} />
                     </div>
-                    {q.type === 'mcq' && !correct && (
+                    {q.type === 'mcq' && !correct && showCycleEndResults && (
                       <div>
                         <span className="text-muted-foreground font-medium">Correct answer: </span>
                         <span className="text-green-700 dark:text-green-400">
@@ -452,24 +498,15 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {/* Full explanation button — shown after 2nd failure (wrong now + was wrong before) */}
-                    {q.type === 'mcq' && !correct && attemptNumber >= 2 && previouslyWrongQuestionIds.includes(q.id) && (
-                      <div className="mt-2">
-                        {!explanations[q.id]?.text && (
-                          <button
-                            type="button"
-                            onClick={() => fetchExplanation(q.id, response?.answer ?? '')}
-                            disabled={explanations[q.id]?.loading}
-                            className="inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-40 transition-colors"
-                          >
-                            {explanations[q.id]?.loading ? 'Loading walkthrough…' : '📖 Show full explanation'}
-                          </button>
-                        )}
-                        {explanations[q.id]?.text && (
-                          <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" role="note" aria-label="Full tutor explanation">
+                    {showCycleEndResults && q.type === 'mcq' && !correct && (
+                      <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" role="note" aria-label="Full tutor explanation">
+                        {explanations[q.id]?.text ? (
+                          <>
                             <p className="font-semibold mb-1">Let&apos;s work through this together</p>
                             <PromptText text={explanations[q.id].text ?? ''} />
-                          </div>
+                          </>
+                        ) : (
+                          <div className="h-4 w-48 animate-pulse rounded bg-blue-200" aria-label="Loading explanation…" />
                         )}
                       </div>
                     )}
@@ -487,23 +524,15 @@ export function TaskRunner({
             <Button variant="outline" onClick={() => router.push(`/courses/${courseId}/lessons/${lessonId}`)}>
               Back to lesson
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                hasSubmitted.current = false
-                setSubmission(null)
-                setAnswers({})
-                setExplanations({})
-                if (timeLimitSeconds && timedMode !== 'untimed') {
-                  localStorage.removeItem(STORAGE_KEY(taskId))
-                  setTimeLeft(timeLimitSeconds)
-                  setTimeExpired(false)
-                  setTimerEnabled(timedMode === 'exam')
-                }
-              }}
-            >
-              Retake task
-            </Button>
+            {showCycleEndResults ? (
+              <Button variant="ghost" onClick={() => resetForRetake('newCycle')}>
+                Start over
+              </Button>
+            ) : previouslyWrongQuestionIds.length > 0 ? (
+              <Button variant="outline" onClick={() => resetForRetake('missed')}>
+                Retake missed questions
+              </Button>
+            ) : null}
           </div>
           {nextHref && (
             <Button
@@ -590,12 +619,12 @@ export function TaskRunner({
 
         {/* Progress indicator */}
         <div className="flex items-center justify-between text-sm text-muted-foreground" aria-live="polite">
-          <span>{answered} of {questions.length} answered</span>
-          <Progress value={(answered / questions.length) * 100} className="w-32" aria-hidden="true" />
+          <span>{answered} of {visibleQuestions.length} answered</span>
+          <Progress value={visibleQuestions.length > 0 ? (answered / visibleQuestions.length) * 100 : 0} className="w-32" aria-hidden="true" />
         </div>
 
         {/* Questions */}
-        {questions.map((q, i) => (
+        {visibleQuestions.map((q, i) => (
           <Card key={q.id}>
             <CardHeader>
               {q.image_url && (
@@ -613,8 +642,7 @@ export function TaskRunner({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Hint accordion — shown on 2nd+ attempt for previously-wrong questions */}
-              {attemptNumber >= 2 && previouslyWrongQuestionIds.includes(q.id) && (
+              {retakeMode === 'missed' && previouslyWrongQuestionIds.includes(q.id) && (
                 <div className="mb-4">
                   <button
                     type="button"
