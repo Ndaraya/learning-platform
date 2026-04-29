@@ -92,21 +92,30 @@ export default async function LessonPage({ params }: Props) {
           <span className="text-sm font-medium text-gray-700 truncate max-w-md">{lesson.title}</span>
           {totalSteps > 1 && (
             <nav aria-label="Task steps" className="flex items-center gap-1.5 shrink-0">
-              {Array.from({ length: totalSteps }).map((_, i) => (
-                <span
-                  key={i}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold border-2 transition-colors"
-                  style={
-                    i + 1 === currentStep
-                      ? { backgroundColor: 'var(--brand)', borderColor: 'var(--brand)', color: 'white' }
-                      : { borderColor: '#d1d5db', color: '#9ca3af' }
-                  }
-                  aria-label={`Step ${i + 1}${i + 1 === currentStep ? ' (current)' : ''}`}
-                  aria-current={i + 1 === currentStep ? 'step' : undefined}
-                >
-                  {i + 1}
-                </span>
-              ))}
+              {Array.from({ length: totalSteps }).map((_, i) => {
+                const stepNum = i + 1
+                const isActive = stepNum === currentStep
+                const href =
+                  stepNum === 1
+                    ? `/courses/${courseId}/lessons/${lessonId}`
+                    : `/courses/${courseId}/lessons/${lessonId}/tasks/${tasks[stepNum - 2]?.id}`
+                return (
+                  <Link
+                    key={i}
+                    href={href}
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold border-2 transition-colors no-underline"
+                    style={
+                      isActive
+                        ? { backgroundColor: 'var(--brand)', borderColor: 'var(--brand)', color: 'white' }
+                        : { borderColor: '#d1d5db', color: '#9ca3af' }
+                    }
+                    aria-label={`Step ${stepNum}${isActive ? ' (current)' : ''}`}
+                    aria-current={isActive ? 'step' : undefined}
+                  >
+                    {stepNum}
+                  </Link>
+                )
+              })}
             </nav>
           )}
         </div>
