@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!question) return NextResponse.json({ error: 'Question not found' }, { status: 404 })
 
-    const hint = question.hint ?? 'No hint available for this question.'
-    return NextResponse.json({ hint })
+    return NextResponse.json({ hint: question.hint ?? null })
   } catch (err) {
     console.error('Question hint error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

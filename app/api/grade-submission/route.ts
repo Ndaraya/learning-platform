@@ -9,9 +9,10 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { taskId, responses } = await request.json() as {
+    const { taskId, responses, cycleStart } = await request.json() as {
       taskId: string
       responses: Array<{ questionId: string; answer: string }>
+      cycleStart?: boolean
     }
 
     if (!taskId || !Array.isArray(responses)) {
@@ -32,11 +33,21 @@ export async function POST(request: NextRequest) {
       points: number; grading_rubric: string | null; options: string[] | null
     }>
 
+    // Determine whether this submission starts a new cycle.
+    // True when the client explicitly requests it (Start over) or when no prior submissions exist.
+    const { count: priorCount } = await supabase
+      .from('task_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('task_id', taskId)
+      .not('graded_at', 'is', null)
+    const isCycleStart = cycleStart === true || (priorCount ?? 0) === 0
+
     // Create submission record
     const maxScore = questions.reduce((sum, q) => sum + q.points, 0)
     const { data: submission, error: submissionError } = await supabase
       .from('task_submissions')
-      .insert({ user_id: user.id, task_id: taskId, max_score: maxScore })
+      .insert({ user_id: user.id, task_id: taskId, max_score: maxScore, cycle_start: isCycleStart })
       .select('id')
       .single()
 
