@@ -37,6 +37,7 @@ interface ExistingSubmission {
 
 interface Props {
   taskId: string
+  taskTitle?: string
   courseId: string
   lessonId: string
   questions: Question[]
@@ -188,13 +189,14 @@ function seededShuffle<T>(arr: T[], seed: string): T[] {
 }
 
 export function TaskRunner({
-  taskId, courseId, lessonId, questions, existingSubmission,
+  taskId, taskTitle = '', courseId, lessonId, questions, existingSubmission,
   timeLimitSeconds, timedMode, nextHref, nextLabel,
   attemptNumber = 1,
   previouslyWrongQuestionIds = [],
   cycleComplete = false,
   previousAnswersByQuestionId = {},
 }: Props) {
+  const isEnglish = taskTitle.toLowerCase().startsWith('english')
   const router = useRouter()
 
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
@@ -664,7 +666,10 @@ export function TaskRunner({
                 <fieldset aria-labelledby={`q-${q.id}-label`}>
                   <legend className="sr-only">Question {i + 1}</legend>
                   <div className="space-y-2">
-                    {seededShuffle(q.options, `${q.id}-${attemptNumber}`).map((option, oi) => {
+                    {(isEnglish
+                      ? [q.options[0], ...seededShuffle(q.options.slice(1), `${q.id}-${attemptNumber}`)]
+                      : seededShuffle(q.options, `${q.id}-${attemptNumber}`)
+                    ).map((option, oi) => {
                       const content = option.replace(/^[A-D]\)\s*/, '')
                       const displayText = `${DISPLAY_LETTERS[oi]}) ${content}`
                       const inputId = `q-${q.id}-opt-${oi}`

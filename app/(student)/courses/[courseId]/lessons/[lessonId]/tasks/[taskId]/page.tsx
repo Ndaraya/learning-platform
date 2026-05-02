@@ -247,6 +247,7 @@ export default async function TaskPage({ params }: Props) {
             <div className="flex-1 h-full overflow-y-auto px-6 py-6 space-y-6">
               <TaskRunner
                 taskId={taskId}
+                taskTitle={task.title}
                 courseId={courseId}
                 lessonId={lessonId}
                 questions={questions}
@@ -356,6 +357,7 @@ export default async function TaskPage({ params }: Props) {
             ) : (
               <TaskRunner
                 taskId={taskId}
+                taskTitle={task.title}
                 courseId={courseId}
                 lessonId={lessonId}
                 questions={questions}
