@@ -17,6 +17,7 @@ interface Question {
   options: string[] | null
   points: number
   image_url?: string | null
+  author_note?: string | null
 }
 
 interface QuestionResponse {
@@ -373,6 +374,7 @@ export function TaskRunner({
     )
     const wrongMcqs = questions.filter((q) => {
       if (q.type !== 'mcq') return false
+      if (q.author_note) return false  // video walkthrough covers it
       const r = map[q.id]
       return r && (r.score ?? 0) < r.max_score
     })
@@ -500,7 +502,18 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {showCycleEndResults && q.type === 'mcq' && !correct && (
+                    {q.type === 'mcq' && !correct && q.author_note && (
+                      <div className="mt-2 aspect-video rounded-md overflow-hidden border">
+                        <iframe
+                          src={q.author_note}
+                          title={`Solution walkthrough for question ${i + 1}`}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    )}
+                    {showCycleEndResults && q.type === 'mcq' && !correct && !q.author_note && (
                       <div className="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900" role="note" aria-label="Full tutor explanation">
                         {explanations[q.id]?.text ? (
                           <>

@@ -32,7 +32,7 @@ export default async function TaskPage({ params }: Props) {
   const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }] = await Promise.all([
     supabase
       .from('tasks')
-      .select('id, title, type, instructions, video_url, content_body, image_urls, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points, image_url)')
+      .select('id, title, type, instructions, video_url, content_body, image_urls, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points, image_url, author_note)')
       .eq('id', taskId)
       .single(),
     supabase
@@ -162,7 +162,7 @@ export default async function TaskPage({ params }: Props) {
   const passageBody = rawPassage?.replace(/^## PASSAGE:[^\n]*\n(\*[^\n]*\*\n)?/m, '').trim() ?? ''
 
   const questions = task.questions as Array<{
-    id: string; prompt: string; type: 'mcq' | 'written'; options: string[] | null; points: number; image_url?: string | null
+    id: string; prompt: string; type: 'mcq' | 'written'; options: string[] | null; points: number; image_url?: string | null; author_note?: string | null
   }>
 
   const taskIndex = sortedLessonTasks.findIndex((t) => t.id === taskId)
