@@ -34,17 +34,32 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session
       if (session.mode !== 'subscription') break
 
-      const userId = session.metadata?.supabase_user_id ?? null
-      const tier   = session.metadata?.tier ?? 'pro'
+      const userId   = session.metadata?.supabase_user_id ?? null
+      const tier     = session.metadata?.tier ?? 'pro'
+      const courseId = session.metadata?.course_id ?? null
 
       if (!userId) break
 
       await supabase.from('profiles').update({
-        subscription_tier:   tier,
-        subscription_status: 'active',
-        subscription_id:     session.subscription as string,
-        stripe_customer_id:  session.customer as string,
+        subscription_tier:    tier,
+        subscription_status:  'active',
+        subscription_id:      session.subscription as string,
+        stripe_customer_id:   session.customer as string,
+        ...(courseId ? { subscribed_course_id: courseId } : {}),
       }).eq('id', userId)
+
+      // Auto-enroll in the subscribed course so they don't have to click Enroll
+      if (courseId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('org_id')
+          .eq('id', userId)
+          .single()
+        await supabase.from('enrollments').upsert(
+          { user_id: userId, course_id: courseId, org_id: (profile as { org_id?: string | null } | null)?.org_id ?? null },
+          { onConflict: 'user_id,course_id', ignoreDuplicates: true }
+        )
+      }
 
       break
     }

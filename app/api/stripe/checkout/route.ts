@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const tier     = formData.get('tier')?.toString() ?? 'pro'
   const interval = formData.get('interval')?.toString() ?? 'monthly'
+  const courseId = formData.get('courseId')?.toString() ?? ''
 
   const priceId = PRICE_IDS[tier]?.[interval]
   if (!priceId) {
@@ -57,11 +58,13 @@ export async function POST(request: NextRequest) {
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/dashboard?upgraded=true`,
-      cancel_url:  `${appUrl}/pricing`,
-      metadata: { supabase_user_id: user.id, tier },
+      success_url: courseId
+        ? `${appUrl}/dashboard?upgraded=true&course=${courseId}`
+        : `${appUrl}/dashboard?upgraded=true`,
+      cancel_url: courseId ? `${appUrl}/courses/${courseId}` : `${appUrl}/pricing`,
+      metadata: { supabase_user_id: user.id, tier, course_id: courseId },
       subscription_data: {
-        metadata: { supabase_user_id: user.id, tier },
+        metadata: { supabase_user_id: user.id, tier, course_id: courseId },
       },
       allow_promotion_codes: true,
     })

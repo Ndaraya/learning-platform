@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -711,20 +712,21 @@ export function TaskRunner({
                   </div>
                 </fieldset>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label htmlFor={`q-${q.id}-text`} className="sr-only">
                     Your answer for question {i + 1}
                   </label>
-                  <Textarea
+                  <Input
                     id={`q-${q.id}-text`}
-                    rows={5}
-                    placeholder="Write your response here…"
+                    type="text"
+                    placeholder="Enter a number, fraction, or decimal…"
                     value={answers[q.id] ?? ''}
                     onChange={(e) => setAnswer(q.id, e.target.value)}
                     aria-required="true"
+                    autoComplete="off"
                   />
                   <p className="text-xs text-muted-foreground">
-                    {(answers[q.id] ?? '').trim().split(/\s+/).filter(Boolean).length} words
+                    Accepted formats: integer (e.g. 5), fraction (e.g. 5/3), or decimal rounded to the nearest hundredth (e.g. 1.67)
                   </p>
                 </div>
               )}

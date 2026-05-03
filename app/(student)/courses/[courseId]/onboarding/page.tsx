@@ -23,9 +23,19 @@ export default async function OnboardingPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  // If baseline already exists, skip onboarding
+  // Detect exam type from course title
+  const { data: course } = await supabase
+    .from('courses')
+    .select('title')
+    .eq('id', courseId)
+    .maybeSingle()
+
+  const examType: 'sat' | 'act' = /sat/i.test(course?.title ?? '') ? 'sat' : 'act'
+
+  // If baseline already exists for this exam type, skip onboarding
+  const baselineTable = examType === 'sat' ? 'sat_baselines' : 'act_baselines'
   const { data: baseline } = await supabase
-    .from('act_baselines')
+    .from(baselineTable)
     .select('id')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
@@ -59,7 +69,7 @@ export default async function OnboardingPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <OnboardingFlow courseId={courseId} diagnosticTaskPath={diagnosticTaskPath} />
+      <OnboardingFlow courseId={courseId} examType={examType} diagnosticTaskPath={diagnosticTaskPath} />
     </div>
   )
 }

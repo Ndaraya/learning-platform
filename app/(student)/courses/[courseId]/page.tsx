@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseSidebar } from '@/components/student/CourseSidebar'
 import { CollapsibleModuleList } from '@/components/student/CollapsibleModuleList'
+import { UpgradeCard } from '@/components/student/UpgradeCard'
 
 interface Props {
   params: Promise<{ courseId: string }>
@@ -17,7 +18,7 @@ export default async function CourseDetailPage({ params }: Props) {
 
   const { data: course } = await supabase
     .from('courses')
-    .select('*, modules(id, title, description, section, order, lessons(id, title, order))')
+    .select('*, requires_pro, modules(id, title, description, section, order, lessons(id, title, order))')
     .eq('id', courseId)
     .eq('published', true)
     .single()
@@ -30,6 +31,29 @@ export default async function CourseDetailPage({ params }: Props) {
     .eq('user_id', user.id)
     .eq('course_id', courseId)
     .single()
+
+  // Subscription info — needed to decide whether to show the upgrade card
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_tier, subscribed_course_id')
+    .eq('id', user.id)
+    .single()
+
+  const requiresPro = !!(course as { requires_pro?: boolean }).requires_pro
+  const tier = (profile as { subscription_tier?: string } | null)?.subscription_tier ?? 'free'
+  const isPro = tier === 'pro' || tier === 'enterprise'
+  const subscribedTo = (profile as { subscribed_course_id?: string | null } | null)?.subscribed_course_id ?? null
+
+  // Determine enroll card state
+  const needsUpgrade  = requiresPro && !isPro
+  const wrongCourse   = requiresPro && isPro && subscribedTo !== null && subscribedTo !== courseId
+
+  // If subscribed to a different course, fetch its name for the message
+  let subscribedCourseName: string | null = null
+  if (wrongCourse && subscribedTo) {
+    const { data: sc } = await supabase.from('courses').select('title').eq('id', subscribedTo).single()
+    subscribedCourseName = sc?.title ?? null
+  }
 
   const modules = (course.modules as Array<{
     id: string
@@ -105,11 +129,11 @@ export default async function CourseDetailPage({ params }: Props) {
           </div>
 
           {/* Enroll / Continue card */}
-          <div className="absolute right-8 top-8 bg-white rounded-xl shadow-lg p-5 w-56 z-10">
+          <div className="absolute right-8 top-8 bg-white rounded-xl shadow-lg p-5 w-64 z-10">
             {enrollment ? (
               <>
                 <p className="font-semibold text-sm text-gray-900">
-                  {isComplete ? '🎉 Course complete!' : "You're enrolled!"}
+                  {isComplete ? 'Course complete!' : "You're enrolled!"}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {isComplete ? 'Your certificate is ready.' : 'Keep going with your tasks.'}
@@ -131,6 +155,17 @@ export default async function CourseDetailPage({ params }: Props) {
                     Continue →
                   </Link>
                 )}
+              </>
+            ) : needsUpgrade ? (
+              <UpgradeCard courseId={courseId} courseTitle={course.title} />
+            ) : wrongCourse ? (
+              <>
+                <p className="font-semibold text-sm text-gray-900">Different course subscribed</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Your Pro plan covers{' '}
+                  <span className="font-medium">{subscribedCourseName ?? 'another course'}</span>.
+                  To access this course, contact support or start a new subscription.
+                </p>
               </>
             ) : (
               <>

@@ -1,0 +1,535 @@
+{
+  "h5p_ids": [
+    1,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110
+  ],
+  "appearances": {
+    "58": [
+      "Addition & Subtraction"
+    ],
+    "59": [
+      "Multiplication & Division"
+    ],
+    "61": [
+      "Fraction Addition & Subtraction"
+    ],
+    "62": [
+      "Fraction Multiplication & Division"
+    ],
+    "60": [
+      "Fractions Introduction"
+    ],
+    "67": [
+      "Adding and Subtracting Radicals"
+    ],
+    "69": [
+      "Rationalizing (Conjugates)"
+    ],
+    "70": [
+      "Imaginary Number (i)"
+    ],
+    "73": [
+      "Complex #s SAT & ACT Questions"
+    ],
+    "75": [
+      "Graphing"
+    ],
+    "65": [
+      "Properties of Exponents"
+    ],
+    "63": [
+      "PEMDAS"
+    ],
+    "83": [
+      "Graphing"
+    ],
+    "94": [
+      "Types of Triangles & Trigonometry"
+    ],
+    "95": [
+      "Special Right & Complimentary Angles"
+    ],
+    "97": [
+      "Parts of a Circle"
+    ],
+    "99": [
+      "Standard & General Formula of Circles"
+    ],
+    "98": [
+      "Area of Sector and Arc Length"
+    ],
+    "74": [
+      "Converting Between Forms"
+    ],
+    "76": [
+      "Linear Functions SAT & ACT Q's"
+    ],
+    "82": [
+      "Forms & Converting Forms"
+    ],
+    "64": [
+      "Number Operations Practice"
+    ],
+    "68": [
+      "Multiplying and Dividing Radicals"
+    ],
+    "66": [
+      "Introduction to Radicals"
+    ],
+    "71": [
+      "Addition, Subtraction, and Multiplication"
+    ],
+    "72": [
+      "Division & Conjugates"
+    ],
+    "91": [
+      "Lines & Angle Relationships"
+    ],
+    "92": [
+      "Degrees/Radians & Regular Polygons"
+    ],
+    "93": [
+      "Lines & Angles SAT & ACT Questions"
+    ],
+    "96": [
+      "Triangles SAT & ACT Questions"
+    ],
+    "100": [
+      "Circle Formula SAT & ACT Questions"
+    ],
+    "84": [
+      "GCF & Grouping"
+    ],
+    "85": [
+      "Quadratic Equations"
+    ],
+    "86": [
+      "Sum & Difference of Cubes"
+    ],
+    "87": [
+      "Factoring SAT & ACT Questions"
+    ],
+    "80": [
+      "Function Notation & Composition"
+    ],
+    "81": [
+      "Function Notation SAT & ACT Q's"
+    ],
+    "90": [
+      "Similar Figures"
+    ],
+    "88": [
+      "Long and Synthetic Division"
+    ],
+    "89": [
+      "Polynomial Division SAT & ACT Q's"
+    ],
+    "77": [
+      "Systems Introduction"
+    ],
+    "79": [
+      "Systems SAT & ACT Q's"
+    ],
+    "1": [
+      "Mixture Problems (Coming Soon)"
+    ],
+    "78": [
+      "Solving Systems"
+    ],
+    "39": [
+      "Misplaced & Dangling Modifiers"
+    ],
+    "41": [
+      "Commas"
+    ],
+    "44": [
+      "Semicolons"
+    ],
+    "45": [
+      "Colons"
+    ],
+    "48": [
+      "Apostrophes & Possession"
+    ],
+    "52": [
+      "Who vs. Whom",
+      "Sample Writing: Who vs. Whom"
+    ],
+    "42": [
+      "Clauses & Sentence Structure"
+    ],
+    "37": [
+      "Run-ons & Fragments"
+    ],
+    "105": [
+      "Correlative Coordination"
+    ],
+    "101": [
+      "Subject-Verb Agreement"
+    ],
+    "102": [
+      "Pronoun Reference & Number"
+    ],
+    "103": [
+      "Verb Tense & Gerund Participle"
+    ],
+    "104": [
+      "Adjectives & Adverbs"
+    ],
+    "11": [
+      "Proceed to EDDIFY's Question Bank",
+      "Proceed to EDDIFY's Question Bank",
+      "Proceed to EDDIFY's Question Bank"
+    ],
+    "3": [
+      "Logs"
+    ],
+    "110": [
+      "About the SAT Question Bank"
+    ],
+    "106": [
+      "Types of Passages"
+    ],
+    "108": [
+      "4 Approaches for Reading Success"
+    ],
+    "109": [
+      "8 Types of Questions"
+    ],
+    "5": [
+      "SAT Reading Test 1 Passage 1"
+    ],
+    "6": [
+      "SAT Reading Test 1 Passage 2"
+    ],
+    "7": [
+      "SAT Reading Test 1 Passage 3"
+    ],
+    "107": [
+      "Time Strategy"
+    ],
+    "8": [
+      "SAT Reading Test 1 Passage 4"
+    ],
+    "9": [
+      "SAT Reading Test 1 Passage 5",
+      "Sample Reading: Test 1 Passage 5"
+    ],
+    "12": [
+      "Join EDDIFY today"
+    ],
+    "13": [
+      "SAT Reading Test 2 Passage 1"
+    ],
+    "14": [
+      "SAT Reading Test 2 Passage 2"
+    ],
+    "15": [
+      "SAT Reading Test 2 Passage 3"
+    ],
+    "16": [
+      "SAT Reading Test 2 Passage 4"
+    ],
+    "17": [
+      "SAT Reading Test 2 Passage 5"
+    ],
+    "18": [
+      "Fundamental Counting Principle"
+    ],
+    "19": [
+      "Intro to Probability"
+    ],
+    "20": [
+      "\"AND/OR\" Probability"
+    ],
+    "21": [
+      "Mean, Median, & Mode"
+    ],
+    "22": [
+      "Mean Median Mode Practice"
+    ],
+    "23": [
+      "Correlation"
+    ],
+    "24": [
+      "Two-Way Frequency Tables"
+    ],
+    "25": [
+      "FCM, Probability, & Frequency Practice"
+    ],
+    "26": [
+      "Identifying Functions"
+    ],
+    "27": [
+      "Parent Functions & Transformations"
+    ],
+    "28": [
+      "Transformations Exploration (Desmos)"
+    ],
+    "30": [
+      "Parent Functions & Transformations Practice"
+    ],
+    "29": [
+      "WL Test 1 Passage 1"
+    ],
+    "31": [
+      "WL Test 1 Passage 2"
+    ],
+    "32": [
+      "WL Test 1 Passage 3"
+    ],
+    "33": [
+      "WL Test 1 Passage 4"
+    ],
+    "34": [
+      "WL Test 2 Passage 1"
+    ],
+    "35": [
+      "WL Test 2 Passage 2"
+    ],
+    "36": [
+      "WL Test 2 Passage 4"
+    ],
+    "38": [
+      "Comma Splice"
+    ],
+    "40": [
+      "Prepositional Phrases"
+    ],
+    "46": [
+      "Dashes"
+    ],
+    "47": [
+      "Parentheses"
+    ],
+    "49": [
+      "ACT English Strategy"
+    ],
+    "50": [
+      "Commas between Adjectives"
+    ],
+    "51": [
+      "SAT Writing Strategy"
+    ],
+    "53": [
+      "Transition Words"
+    ],
+    "54": [
+      "Y,Y,N,N and Order Questions"
+    ],
+    "55": [
+      "No Redundancy"
+    ],
+    "56": [
+      "Specific Detail Questions"
+    ]
+  },
+  "probe_results": [
+    {
+      "id": 1,
+      "lesson": "Mixture Problems (Coming Soon)",
+      "endpoints": [
+        {
+          "endpoint": "h5p_rest_v1",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        },
+        {
+          "endpoint": "h5p_embed_ajax",
+          "status": 200,
+          "has_content": true,
+          "has_questions": true,
+          "preview": "<!doctype html> <html lang=\"en\" class=\"h5p-iframe\"> <head>   <meta charset=\"utf-8\">   <title>Interactive Video</title>       <script src=\"https://eddify.co/wp-content/plugins/h5p/h5p-php-library/js/jq"
+        },
+        {
+          "endpoint": "h5p_content_json",
+          "status": 404,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "<!DOCTYPE html><html itemscope itemtype=\"http://schema.org/WebPage\" lang=\"en-US\"><head><meta charset=\"UTF-8\"><link rel=\"profile\" href=\"http://gmpg.org/xfn/11\"><link rel=\"pingback\" href=\"https://eddify"
+        },
+        {
+          "endpoint": "wp_rest_h5p_cpt",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "lesson": "Logs",
+      "endpoints": [
+        {
+          "endpoint": "h5p_rest_v1",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        },
+        {
+          "endpoint": "h5p_embed_ajax",
+          "status": 200,
+          "has_content": true,
+          "has_questions": false,
+          "preview": "<body style=\"margin:0\"><div style=\"background: #fafafa url(https://eddify.co/wp-content/plugins/h5p/h5p-php-library/images/h5p.svg) no-repeat center;background-size: 50% 50%;width: 100%;height: 100%;\""
+        },
+        {
+          "endpoint": "h5p_content_json",
+          "status": 404,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "<!DOCTYPE html><html itemscope itemtype=\"http://schema.org/WebPage\" lang=\"en-US\"><head><meta charset=\"UTF-8\"><link rel=\"profile\" href=\"http://gmpg.org/xfn/11\"><link rel=\"pingback\" href=\"https://eddify"
+        },
+        {
+          "endpoint": "wp_rest_h5p_cpt",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "lesson": "SAT Reading Test 1 Passage 1",
+      "endpoints": [
+        {
+          "endpoint": "h5p_rest_v1",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        },
+        {
+          "endpoint": "h5p_embed_ajax",
+          "status": 200,
+          "has_content": true,
+          "has_questions": false,
+          "preview": "<body style=\"margin:0\"><div style=\"background: #fafafa url(https://eddify.co/wp-content/plugins/h5p/h5p-php-library/images/h5p.svg) no-repeat center;background-size: 50% 50%;width: 100%;height: 100%;\""
+        },
+        {
+          "endpoint": "h5p_content_json",
+          "status": 404,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "<!DOCTYPE html><html itemscope itemtype=\"http://schema.org/WebPage\" lang=\"en-US\"><head><meta charset=\"UTF-8\"><link rel=\"profile\" href=\"http://gmpg.org/xfn/11\"><link rel=\"pingback\" href=\"https://eddify"
+        },
+        {
+          "endpoint": "wp_rest_h5p_cpt",
+          "status": 401,
+          "has_content": false,
+          "has_questions": false,
+          "preview": "{\"code\":\"application_passwords_disabled_for_user\",\"message\":\"Application passwords are not available for your account. Please contact the site administrator for assistance.\",\"data\":{\"status\":401}}"
+        }
+      ]
+    }
+  ],
+  "recommendation": "live_scraping"
+}

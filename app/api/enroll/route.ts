@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   // Verify the course exists and is published
   const { data: course } = await supabase
     .from('courses')
-    .select('id, title')
+    .select('id, title, requires_pro')
     .eq('id', courseId)
     .eq('published', true)
     .single()
@@ -28,6 +28,30 @@ export async function POST(request: NextRequest) {
   if (!course) {
     return NextResponse.json({ error: 'Course not found or not available' }, { status: 404 })
   }
+
+  // ── Subscription gate ────────────────────────────────────────────────────────
+  if ((course as { requires_pro?: boolean }).requires_pro) {
+    const { data: profileSub } = await supabase
+      .from('profiles')
+      .select('subscription_tier, subscribed_course_id')
+      .eq('id', user.id)
+      .single()
+
+    const tier = (profileSub as { subscription_tier?: string } | null)?.subscription_tier ?? 'free'
+    const isPro = tier === 'pro' || tier === 'enterprise'
+
+    if (!isPro) {
+      // Redirect back to course — the page renders an UpgradeCard server-side
+      return NextResponse.redirect(new URL(`/courses/${courseId}`, request.url), 303)
+    }
+
+    const subscribedTo = (profileSub as { subscribed_course_id?: string | null } | null)?.subscribed_course_id
+    // null = grandfathered Pro (full access). Non-null must match this course.
+    if (subscribedTo && subscribedTo !== courseId) {
+      return NextResponse.redirect(new URL(`/courses/${courseId}`, request.url), 303)
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
   // Get the user's org_id and name for the enrollment + email
   const { data: profile } = await supabase
@@ -52,9 +76,11 @@ export async function POST(request: NextRequest) {
   const name = profile?.display_name ?? user.email?.split('@')[0] ?? 'there'
   sendEnrollmentEmail(user.email!, name, course.title, courseId).catch(() => {})
 
-  // Check if a baseline exists — first-time enrollees go to onboarding
+  // SAT courses use sat_baselines; everything else uses act_baselines.
+  const isSat = /sat/i.test(course.title)
+  const baselineTable = isSat ? 'sat_baselines' : 'act_baselines'
   const { data: baseline } = await supabase
-    .from('act_baselines')
+    .from(baselineTable)
     .select('id')
     .eq('user_id', user.id)
     .eq('course_id', courseId)

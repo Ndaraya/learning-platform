@@ -1,0 +1,836 @@
+{
+  "course": {
+    "title": "SAT Prep",
+    "slug": "sat-prep",
+    "description": "A comprehensive, self-paced SAT preparation program covering English and Math. Each lesson includes a focused video explanation, followed by practice to reinforce the concept.",
+    "published": false
+  },
+  "modules": [
+    {
+      "title": "SAT English: PUNCTUATION",
+      "order": 1,
+      "lessons": [
+        {
+          "title": "Commas",
+          "youtube_url": "https://youtu.be/_H8qaLY2kvM",
+          "description": "",
+          "body_html": "[h5p id=\"41\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Semicolons",
+          "youtube_url": "https://youtu.be/mRttqN3jILY",
+          "description": "",
+          "body_html": "[h5p id=\"44\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Apostrophes & Possession",
+          "youtube_url": "https://youtu.be/4x2NPfQV5Uc",
+          "description": "",
+          "body_html": "[h5p id=\"48\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Colons",
+          "youtube_url": "https://youtu.be/rLSY9ZlQxpA",
+          "description": "",
+          "body_html": "[h5p id=\"45\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Dashes",
+          "youtube_url": "https://youtu.be/czF0BjqT-zg",
+          "description": "",
+          "body_html": "[h5p id=\"46\"]",
+          "order": 5,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Parenthesis",
+          "youtube_url": "https://youtu.be/TAw5rYb_DZM",
+          "description": "",
+          "body_html": "",
+          "order": 6,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Commas between Adjectives",
+          "youtube_url": "https://youtu.be/YG7BJUyC_3U",
+          "description": "",
+          "body_html": "[h5p id=\"50\"]",
+          "order": 7,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: WHO vs. WHOM",
+      "order": 2,
+      "lessons": [
+        {
+          "title": "Who vs. Whom",
+          "youtube_url": "https://youtu.be/1f1HU48fr1Q",
+          "description": "",
+          "body_html": "[h5p id=\"52\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: TRANSITION WORDS",
+      "order": 3,
+      "lessons": [
+        {
+          "title": "Transition Words",
+          "youtube_url": "https://youtu.be/8WaIbntoAJw",
+          "description": "",
+          "body_html": "[h5p id=\"53\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: MODIFIERS",
+      "order": 4,
+      "lessons": [
+        {
+          "title": "Missing & Dangling Modifiers",
+          "youtube_url": "https://youtu.be/J961JKMDJbQ",
+          "description": "",
+          "body_html": "[h5p id=\"39\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: YES, YES, NO, NO",
+      "order": 5,
+      "lessons": [
+        {
+          "title": "Y, Y, N, N, and Order Questions",
+          "youtube_url": "https://youtu.be/sLA4uQKVZDU",
+          "description": "",
+          "body_html": "[h5p id=\"54\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: REDUNDANCY",
+      "order": 6,
+      "lessons": [
+        {
+          "title": "No Redundancy",
+          "youtube_url": "https://youtu.be/vuM1hfO7zmo",
+          "description": "",
+          "body_html": "[h5p id=\"55\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT English: SPECIFIC DETAIL",
+      "order": 7,
+      "lessons": [
+        {
+          "title": "Specific Detail",
+          "youtube_url": "https://youtu.be/hlEv1XJuMxI",
+          "description": "",
+          "body_html": "[h5p id=\"56\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Integer",
+      "order": 8,
+      "lessons": [
+        {
+          "title": "Addition & Subtraction",
+          "youtube_url": "https://youtu.be/Yrq1wSoutEY",
+          "description": "",
+          "body_html": "[h5p id=\"58\"]\r\n\r\nIf you haven't already: <a href=\"https://eddify.co/Number-Operations-Part-One.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Download PDF</a>",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Multiplication & Division",
+          "youtube_url": "https://youtu.be/CL0K6ZzStNc",
+          "description": "",
+          "body_html": "[h5p id=\"59\"]\r\n\r\nIf you haven't already: <a href=\"https://eddify.co/Number-Operations-Part-One.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Download PDF</a>",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Fractions",
+      "order": 9,
+      "lessons": [
+        {
+          "title": "Fractions Introduction",
+          "youtube_url": "https://youtu.be/rINPGm3bo10",
+          "description": "",
+          "body_html": "[h5p id=\"60\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Fraction Addition & Subtraction",
+          "youtube_url": "https://youtu.be/8r5l1Y0aclM",
+          "description": "",
+          "body_html": "[h5p id=\"61\"]\r\n\r\nIf you haven't already: <a href=\"https://eddify.co/Number-Operations-Part-One.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Download PDF</a>",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Fraction Multiplication & Division",
+          "youtube_url": "https://youtu.be/9UQ4ypcboyA",
+          "description": "",
+          "body_html": "[h5p id=\"62\"]\r\n\r\nIf you haven't already: <a href=\"https://eddify.co/Number-Operations-Part-One.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Download PDF</a>",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Order of Operations",
+      "order": 10,
+      "lessons": [
+        {
+          "title": "PEMDAS",
+          "youtube_url": "https://youtu.be/EXQ6nW1vEEI",
+          "description": "",
+          "body_html": "[h5p id=\"63\"]\r\n\r\nIf you haven't already: <a href=\"https://eddify.co/Number-Operations-Part-One.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Download PDF</a>",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Properties of Exponents & Radicals",
+      "order": 11,
+      "lessons": [
+        {
+          "title": "Properties of Exponents",
+          "youtube_url": "https://youtu.be/k5dPBZgEfsQ",
+          "description": "",
+          "body_html": "[h5p id=\"65\"]\r\n\r\n<a href=\"#\" target=\"_blank\" rel=\"noopener noreferrer\">Properties of Exponents PDF</a>",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Introduction to Radicals",
+          "youtube_url": "https://youtu.be/D0vQZNCRhg0",
+          "description": "",
+          "body_html": "[h5p id=\"66\"]\r\n\r\n<a href=\"#\" target=\"_blank\" rel=\"noopener noreferrer\">Introduction to Radicals PDF</a>",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Adding and Subtracting Radicals",
+          "youtube_url": "https://youtu.be/AB2v7zHCK8k",
+          "description": "",
+          "body_html": "[h5p id=\"67\"]\r\n\r\n&nbsp;\r\n\r\n<a href=\"#\" target=\"_blank\" rel=\"noopener noreferrer\">Radicals Addition and Subtraction PDF</a>",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Multiplying and Dividing Radicals",
+          "youtube_url": "https://youtu.be/YqKCpKQ0bGQ",
+          "description": "",
+          "body_html": "[h5p id=\"68\"]\r\n\r\n&nbsp;\r\n\r\n<a href=\"#\" target=\"_blank\" rel=\"noopener noreferrer\">Multiplying and Dividing Radicals PDF</a>",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Rationalizing (Conjugates)",
+          "youtube_url": "https://youtu.be/7-SUqsZZ-yM",
+          "description": "",
+          "body_html": "[h5p id=\"69\"]\r\n\r\n&nbsp;\r\n\r\n<a href=\"#\" target=\"_blank\" rel=\"noopener noreferrer\">Rationalizing Using Conjugates PDF</a>",
+          "order": 5,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Complex Numbers",
+      "order": 12,
+      "lessons": [
+        {
+          "title": "Imaginary Number (i)",
+          "youtube_url": "https://youtu.be/SOKlgWrcbG8",
+          "description": "",
+          "body_html": "[h5p id=\"70\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Addition, Subtraction, and Multiplication",
+          "youtube_url": "https://youtu.be/GbYzIdIO94U",
+          "description": "",
+          "body_html": "[h5p id=\"71\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Division & Conjugates",
+          "youtube_url": "https://youtu.be/SIYabPbmNOQ",
+          "description": "",
+          "body_html": "[h5p id=\"72\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Complex #s SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/oUEkb30OSew",
+          "description": "",
+          "body_html": "[h5p id=\"73\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Linear Functions",
+      "order": 13,
+      "lessons": [
+        {
+          "title": "Converting Between Forms",
+          "youtube_url": "https://youtu.be/MdNCQBAcEU0",
+          "description": "",
+          "body_html": "[h5p id=\"74\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Graphing",
+          "youtube_url": "https://youtu.be/LpKfnxp8Lto",
+          "description": "",
+          "body_html": "[h5p id=\"83\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Linear Functions SAT & ACT Q’s",
+          "youtube_url": "https://youtu.be/83Lj-Y7IKdw",
+          "description": "",
+          "body_html": "[h5p id=\"76\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Systems of Equations",
+      "order": 14,
+      "lessons": [
+        {
+          "title": "Systems Introduction",
+          "youtube_url": "https://youtu.be/698_HrlBkII",
+          "description": "",
+          "body_html": "[h5p id=\"77\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Solving Systems",
+          "youtube_url": "https://youtu.be/nL0r3CfMVS4",
+          "description": "",
+          "body_html": "[h5p id=\"78\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Mixture Problems",
+          "youtube_url": "https://youtu.be/vAz5jVP4B50",
+          "description": "",
+          "body_html": "[h5p id=\"1\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Systems SAT & ACT Q’s",
+          "youtube_url": "https://youtu.be/ryP7gaDHf0g",
+          "description": "",
+          "body_html": "[h5p id=\"79\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Function Notation",
+      "order": 15,
+      "lessons": [
+        {
+          "title": "Function Notation & Composition",
+          "youtube_url": "https://youtu.be/ibrs1YDVhTc",
+          "description": "",
+          "body_html": "[h5p id=\"80\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Function Notation SAT & ACT Q’s",
+          "youtube_url": "https://youtu.be/RVr0xP1Sgc8",
+          "description": "",
+          "body_html": "[h5p id=\"81\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Quadratic Functions",
+      "order": 16,
+      "lessons": [
+        {
+          "title": "Forms & Converting Forms",
+          "youtube_url": "https://youtu.be/RVr0xP1Sgc8",
+          "description": "",
+          "body_html": "[h5p id=\"82\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Graphing",
+          "youtube_url": "https://youtu.be/RVr0xP1Sgc8",
+          "description": "",
+          "body_html": "[h5p id=\"83\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Factoring",
+      "order": 17,
+      "lessons": [
+        {
+          "title": "GCF & Grouping",
+          "youtube_url": "https://youtu.be/EL4D_Zncd3Y",
+          "description": "",
+          "body_html": "[h5p id=\"84\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Quadratic Equations",
+          "youtube_url": "https://youtu.be/G69wnyoqAZs",
+          "description": "",
+          "body_html": "[h5p id=\"85\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Sum & Difference of Cubes",
+          "youtube_url": "https://youtu.be/rKCq4r2Js2g",
+          "description": "",
+          "body_html": "[h5p id=\"86\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Factoring SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/tTKqylLKiwM",
+          "description": "",
+          "body_html": "[h5p id=\"87\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Polynomial Division",
+      "order": 18,
+      "lessons": [
+        {
+          "title": "Long and Synthetic Division",
+          "youtube_url": "https://youtu.be/vhZ1Xiqpk3c",
+          "description": "",
+          "body_html": "[h5p id=\"88\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Polynomial Division SAT & ACT Q’s",
+          "youtube_url": "https://youtu.be/egPtrXXc_Go",
+          "description": "",
+          "body_html": "[h5p id=\"89\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Similarity",
+      "order": 19,
+      "lessons": [
+        {
+          "title": "Similar Figures",
+          "youtube_url": "https://youtu.be/LLsVGS_2S5Y",
+          "description": "",
+          "body_html": "[h5p id=\"90\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Lines, Angles, & Triangles",
+      "order": 20,
+      "lessons": [
+        {
+          "title": "Lines & Angle Relationships",
+          "youtube_url": "https://youtu.be/FuwXyDwORsg",
+          "description": "",
+          "body_html": "[h5p id=\"91\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Degrees/Radians & Regular Polygons",
+          "youtube_url": "https://youtu.be/AdNlwk_xzOI",
+          "description": "",
+          "body_html": "[h5p id=\"92\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Lines & Angles SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/euKKwJmBLAI",
+          "description": "",
+          "body_html": "[h5p id=\"93\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Types of Triangles & Trigonometry",
+          "youtube_url": "https://youtu.be/_aieWno-Jz8",
+          "description": "",
+          "body_html": "[h5p id=\"94\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Special Right & Complimentary Angles",
+          "youtube_url": "https://youtu.be/4Ytmul9Sw-8",
+          "description": "",
+          "body_html": "[h5p id=\"95\"]",
+          "order": 5,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Triangles SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/kuDYl6zoZmY",
+          "description": "",
+          "body_html": "[h5p id=\"96\"]",
+          "order": 6,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Circles",
+      "order": 21,
+      "lessons": [
+        {
+          "title": "Area of Sector and Arc Length",
+          "youtube_url": "https://youtu.be/8S6X45-Ddew",
+          "description": "",
+          "body_html": "[h5p id=\"98\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Sector and Arc SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/1Ut0D_JJelM",
+          "description": "",
+          "body_html": ".",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Standard & General Formula of Circles",
+          "youtube_url": "https://youtu.be/ldPDaa8mm5c",
+          "description": "",
+          "body_html": "[h5p id=\"99\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Circle Formula SAT & ACT Questions",
+          "youtube_url": "https://youtu.be/xqLZI8ivcgE",
+          "description": "",
+          "body_html": "[h5p id=\"100\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Parent Functions & Transformations",
+      "order": 22,
+      "lessons": [
+        {
+          "title": "Identifying Functions",
+          "youtube_url": "https://youtu.be/hTssLd88kBw",
+          "description": "",
+          "body_html": "[h5p id=\"26\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Parent Functions & Transformations",
+          "youtube_url": "https://youtu.be/kdsgX5rz-Bg",
+          "description": "",
+          "body_html": "[h5p id=\"27\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Transformations Exploration (Desmos)",
+          "youtube_url": "https://youtu.be/RVr0xP1Sgc8",
+          "description": "",
+          "body_html": "[h5p id=\"28\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Parent Functions & Transformations Practice",
+          "youtube_url": "https://youtu.be/66SlH2UcCKE",
+          "description": "",
+          "body_html": "[h5p id=\"30\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "title": "SAT Math: Data & Statistics",
+      "order": 23,
+      "lessons": [
+        {
+          "title": "Fundamental Counting Principle",
+          "youtube_url": "https://youtu.be/0ow4ocilwWc",
+          "description": "",
+          "body_html": "[h5p id=\"18\"]",
+          "order": 1,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Intro to Probability",
+          "youtube_url": "https://youtu.be/hHvLz3SMlbA",
+          "description": "",
+          "body_html": "[h5p id=\"19\"]",
+          "order": 2,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "“AND/OR” Probability",
+          "youtube_url": "https://youtu.be/6EqfNSxTzI8",
+          "description": "",
+          "body_html": "[h5p id=\"20\"]",
+          "order": 3,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Mean, Median, & Mode",
+          "youtube_url": "https://youtu.be/xT1AX1hrByE",
+          "description": "",
+          "body_html": "[h5p id=\"21\"]",
+          "order": 4,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Mean Median Mode Practice",
+          "youtube_url": "https://youtu.be/kH8M0plcrGg",
+          "description": "",
+          "body_html": "[h5p id=\"22\"]",
+          "order": 5,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Correlation",
+          "youtube_url": "https://youtu.be/r5nnTTP7wJQ",
+          "description": "",
+          "body_html": "[h5p id=\"23\"]",
+          "order": 6,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "Two-Way Frequency Tables",
+          "youtube_url": "https://youtu.be/aIpOMLMN3Ic",
+          "description": "",
+          "body_html": "[h5p id=\"24\"]",
+          "order": 7,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        },
+        {
+          "title": "FCM, Probability, & Frequency Practice",
+          "youtube_url": "https://youtu.be/GXLwNJ6zhEo",
+          "description": "",
+          "body_html": "[h5p id=\"25\"]",
+          "order": 8,
+          "wp_item_id": null,
+          "video_from_xlsx": true,
+          "tasks": []
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "total_modules": 23,
+    "total_lessons": 68,
+    "total_tasks": 0,
+    "total_questions": 0,
+    "placeholder_video": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "lessons_missing_video": 0
+  }
+}
