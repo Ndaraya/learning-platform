@@ -502,7 +502,7 @@ export function TaskRunner({
                         )}
                       </div>
                     )}
-                    {q.type === 'mcq' && !correct && q.author_note && (
+                    {q.type === 'mcq' && q.author_note && (
                       <div className="mt-2 aspect-video rounded-md overflow-hidden border">
                         <iframe
                           src={q.author_note}
