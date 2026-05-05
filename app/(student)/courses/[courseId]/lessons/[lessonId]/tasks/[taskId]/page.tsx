@@ -22,14 +22,17 @@ export default async function TaskPage({ params }: Props) {
 
   const { data: enrollment } = await supabase
     .from('enrollments')
-    .select('id')
+    .select('id, courses(slug)')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
     .single()
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }, { data: course }] = await Promise.all([
+  const courseSlug = (enrollment as { courses?: { slug?: string } | null })?.courses?.slug ?? ''
+  const isQuestionBank = courseSlug.includes('question-bank')
+
+  const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }] = await Promise.all([
     supabase
       .from('tasks')
       .select('id, title, type, instructions, video_url, content_body, image_urls, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points, image_url, author_note)')
@@ -55,14 +58,7 @@ export default async function TaskPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
-    supabase
-      .from('courses')
-      .select('slug')
-      .eq('id', courseId)
-      .single(),
   ])
-
-  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
 
   const ACCOMMODATION_MULTIPLIER: Record<string, number> = {
     standard: 1,

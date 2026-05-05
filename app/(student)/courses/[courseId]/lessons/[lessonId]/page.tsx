@@ -19,14 +19,17 @@ export default async function LessonPage({ params }: Props) {
 
   const { data: enrollment } = await supabase
     .from('enrollments')
-    .select('id')
+    .select('id, courses(slug)')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
     .single()
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: lesson }, { data: courseModules }, { data: course }] = await Promise.all([
+  const courseSlug = (enrollment as { courses?: { slug?: string } | null })?.courses?.slug ?? ''
+  const isQuestionBank = courseSlug.includes('question-bank')
+
+  const [{ data: lesson }, { data: courseModules }] = await Promise.all([
     supabase
       .from('lessons')
       .select('*, tasks(id, title, type, order)')
@@ -37,14 +40,7 @@ export default async function LessonPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
-    supabase
-      .from('courses')
-      .select('slug')
-      .eq('id', courseId)
-      .single(),
   ])
-
-  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
 
   if (!lesson) notFound()
 
