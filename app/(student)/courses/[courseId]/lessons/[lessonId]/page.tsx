@@ -58,6 +58,7 @@ export default async function LessonPage({ params }: Props) {
   const contentUrl = (lesson as { content_url?: string | null }).content_url ?? lesson.youtube_url ?? null
   const contentBody = (lesson as { content_body?: string | null }).content_body ?? null
   const imageUrls = (lesson as { image_urls?: string[] }).image_urls ?? []
+  const isQuestionBank = !contentUrl && !contentBody && imageUrls.length === 0
 
   const tasks = (lesson.tasks as Array<{ id: string; title: string; type: string; order: number }>)
     ?.sort((a, b) => a.order - b.order) ?? []
