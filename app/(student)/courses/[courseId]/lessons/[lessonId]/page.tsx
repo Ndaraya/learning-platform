@@ -48,6 +48,12 @@ export default async function LessonPage({ params }: Props) {
 
   if (!lesson) notFound()
 
+  if (isQuestionBank) {
+    const firstTask = (lesson.tasks as Array<{ id: string; order: number }>)
+      ?.sort((a, b) => a.order - b.order)[0]
+    if (firstTask) redirect(`/courses/${courseId}/lessons/${lessonId}/tasks/${firstTask.id}`)
+  }
+
   const lessonType = (lesson as { lesson_type?: string }).lesson_type ?? 'video'
   const contentUrl = (lesson as { content_url?: string | null }).content_url ?? lesson.youtube_url ?? null
   const contentBody = (lesson as { content_body?: string | null }).content_body ?? null
