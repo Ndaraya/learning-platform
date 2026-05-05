@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { TaskRunner } from '@/components/student/TaskRunner'
@@ -30,10 +29,6 @@ export default async function TaskPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const serviceClient = createServiceClient()
-  const { data: course } = await serviceClient.from('courses').select('slug').eq('id', courseId).single()
-  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
-
   const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }] = await Promise.all([
     supabase
       .from('tasks')
@@ -47,7 +42,7 @@ export default async function TaskPage({ params }: Props) {
       .order('order'),
     supabase
       .from('lessons')
-      .select('id, title, module_id')
+      .select('id, title, module_id, youtube_url, content_url, content_body, image_urls')
       .eq('id', lessonId)
       .single(),
     supabase
@@ -153,6 +148,14 @@ export default async function TaskPage({ params }: Props) {
     }
   }
 
+  const lessonHasContent = !!(
+    (lesson as { youtube_url?: string | null } | null)?.youtube_url ||
+    (lesson as { content_url?: string | null } | null)?.content_url ||
+    (lesson as { content_body?: string | null } | null)?.content_body ||
+    ((lesson as { image_urls?: string[] } | null)?.image_urls ?? []).length > 0
+  )
+  const isQuestionBank = !lessonHasContent
+
   const taskType = (task as { type?: string }).type ?? 'quiz'
   const taskContentBody = (task as { content_body?: string | null }).content_body ?? null
   const taskImageUrls = (task as { image_urls?: string[] }).image_urls ?? []
@@ -196,6 +199,15 @@ export default async function TaskPage({ params }: Props) {
   const nextLessonId = nextLessonInModule?.id ?? nextModuleFirstLesson?.id ?? null
   const nextLessonHref = nextLessonId ? `/courses/${courseId}/lessons/${nextLessonId}` : null
 
+  const allLessonIds = modules.flatMap((m) => (m.lessons ?? []).map((l) => l.id))
+  const { data: allCourseTasks } = allLessonIds.length > 0
+    ? await supabase.from('tasks').select('id, lesson_id, order').in('lesson_id', allLessonIds).order('order')
+    : { data: [] }
+  const lessonFirstTaskMap: Record<string, string> = {}
+  for (const t of (allCourseTasks ?? []) as Array<{ id: string; lesson_id: string; order: number }>) {
+    if (!lessonFirstTaskMap[t.lesson_id]) lessonFirstTaskMap[t.lesson_id] = t.id
+  }
+
   return (
     <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
       <CourseSidebar
@@ -205,6 +217,7 @@ export default async function TaskPage({ params }: Props) {
         currentTaskId={taskId}
         tasks={sortedLessonTasks}
         submittedTaskIds={submittedTaskIds}
+        lessonFirstTaskMap={lessonFirstTaskMap}
       />
 
       <div className="flex-1 overflow-y-auto">

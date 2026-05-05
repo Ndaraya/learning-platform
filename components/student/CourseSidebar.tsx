@@ -34,6 +34,8 @@ interface Props {
   tasks?: Task[]
   /** IDs of tasks the student has already submitted */
   submittedTaskIds?: string[]
+  /** lessonId → first task ID; when present, lesson links go directly to the task */
+  lessonFirstTaskMap?: Record<string, string>
 }
 
 function IconChevronLeft() {
@@ -70,6 +72,7 @@ export function CourseSidebar({
   currentTaskId,
   tasks = [],
   submittedTaskIds = [],
+  lessonFirstTaskMap = {},
 }: Props) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   // resolvedLessonId: use the prop when known, otherwise fall back to last-stored lesson
@@ -253,7 +256,7 @@ export function CourseSidebar({
                                   {/* Lesson row */}
                                   <Link
                                     ref={isCurrent ? activeItemRef : null}
-                                    href={`/courses/${courseId}/lessons/${lesson.id}`}
+                                    href={lessonFirstTaskMap[lesson.id] ? `/courses/${courseId}/lessons/${lesson.id}/tasks/${lessonFirstTaskMap[lesson.id]}` : `/courses/${courseId}/lessons/${lesson.id}`}
                                     className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1"
                                     style={
                                       lessonIsActiveWithoutTask
@@ -359,7 +362,7 @@ export function CourseSidebar({
                                 return (
                                   <li key={lesson.id}>
                                     <Link
-                                      href={`/courses/${courseId}/lessons/${lesson.id}`}
+                                      href={lessonFirstTaskMap[lesson.id] ? `/courses/${courseId}/lessons/${lesson.id}/tasks/${lessonFirstTaskMap[lesson.id]}` : `/courses/${courseId}/lessons/${lesson.id}`}
                                       className="block rounded px-2 py-1.5 text-xs leading-snug transition-colors no-underline"
                                       style={isCurrent ? { backgroundColor: 'var(--brand)', color: 'white', fontWeight: 600 } : { color: '#4b5563' }}
                                     >

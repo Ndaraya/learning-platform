@@ -26,7 +26,7 @@ export default async function LessonPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: lesson }, { data: courseModules }, { data: firstTask }] = await Promise.all([
+  const [{ data: lesson }, { data: courseModules }] = await Promise.all([
     supabase
       .from('lessons')
       .select('*, tasks(id, title, type, order)')
@@ -37,20 +37,21 @@ export default async function LessonPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
-    supabase
-      .from('tasks')
-      .select('id, order')
-      .eq('lesson_id', lessonId)
-      .order('order')
-      .limit(1)
-      .maybeSingle(),
   ])
 
   if (!lesson) notFound()
 
-  const hasContent = !!(lesson.youtube_url ?? (lesson as { content_url?: string | null }).content_url ?? (lesson as { content_body?: string | null }).content_body ?? (lesson as { image_urls?: string[] }).image_urls?.length)
-  if (!hasContent && firstTask) {
-    redirect(`/courses/${courseId}/lessons/${lessonId}/tasks/${firstTask.id}`)
+  const allLessonIds = (courseModules ?? []).flatMap(
+    (m) => (m.lessons ?? []).map((l: { id: string }) => l.id)
+  )
+  const { data: allCourseTasks } = allLessonIds.length > 0
+    ? await supabase.from('tasks').select('id, lesson_id, order').in('lesson_id', allLessonIds).order('order')
+    : { data: [] }
+
+  // Build lessonId → first task ID map for the sidebar links
+  const lessonFirstTaskMap: Record<string, string> = {}
+  for (const t of (allCourseTasks ?? []) as Array<{ id: string; lesson_id: string; order: number }>) {
+    if (!lessonFirstTaskMap[t.lesson_id]) lessonFirstTaskMap[t.lesson_id] = t.id
   }
 
   const lessonType = (lesson as { lesson_type?: string }).lesson_type ?? 'video'
@@ -96,7 +97,7 @@ export default async function LessonPage({ params }: Props) {
 
   return (
     <div className="flex overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
-      <CourseSidebar courseId={courseId} modules={modules} currentLessonId={lessonId} />
+      <CourseSidebar courseId={courseId} modules={modules} currentLessonId={lessonId} lessonFirstTaskMap={lessonFirstTaskMap} />
 
       <div className="flex-1 overflow-y-auto">
         {/* Top bar */}
