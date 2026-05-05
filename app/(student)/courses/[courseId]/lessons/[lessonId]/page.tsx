@@ -26,7 +26,7 @@ export default async function LessonPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: lesson }, { data: courseModules }] = await Promise.all([
+  const [{ data: lesson }, { data: courseModules }, { data: course }] = await Promise.all([
     supabase
       .from('lessons')
       .select('*, tasks(id, title, type, order)')
@@ -37,7 +37,14 @@ export default async function LessonPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
+    supabase
+      .from('courses')
+      .select('slug')
+      .eq('id', courseId)
+      .single(),
   ])
+
+  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
 
   if (!lesson) notFound()
 
@@ -123,29 +130,33 @@ export default async function LessonPage({ params }: Props) {
         {/* Content */}
         <div className="max-w-3xl mx-auto px-8 py-8 space-y-8">
 
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Task Overview</h1>
-          </div>
+          {!isQuestionBank && (
+            <>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Task Overview</h1>
+              </div>
 
-          {/* What you'll learn / do */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="rounded-xl border p-5 space-y-2">
-              <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>What you&apos;ll learn</p>
-              <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-                <li>{lesson.title}</li>
-                {lesson.description && <li>{lesson.description}</li>}
-              </ul>
-            </div>
-            <div className="rounded-xl border p-5 space-y-2">
-              <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>What you&apos;ll do</p>
-              <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-                <li>{taskVerb[lessonType] ?? 'Review the lesson content'}</li>
-                {tasks.map((t) => (
-                  <li key={t.id}>Complete: {t.title}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              {/* What you'll learn / do */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="rounded-xl border p-5 space-y-2">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>What you&apos;ll learn</p>
+                  <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>{lesson.title}</li>
+                    {lesson.description && <li>{lesson.description}</li>}
+                  </ul>
+                </div>
+                <div className="rounded-xl border p-5 space-y-2">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>What you&apos;ll do</p>
+                  <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                    <li>{taskVerb[lessonType] ?? 'Review the lesson content'}</li>
+                    {tasks.map((t) => (
+                      <li key={t.id}>Complete: {t.title}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Lesson content — type-specific */}
           <section aria-labelledby="lesson-content-heading">
