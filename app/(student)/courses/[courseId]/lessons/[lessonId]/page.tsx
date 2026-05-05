@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createServiceClient } from '@/lib/supabase/service'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseSidebar } from '@/components/student/CourseSidebar'
@@ -27,10 +26,6 @@ export default async function LessonPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const serviceClient = createServiceClient()
-  const { data: course } = await serviceClient.from('courses').select('slug').eq('id', courseId).single()
-  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
-
   const [{ data: lesson }, { data: courseModules }] = await Promise.all([
     supabase
       .from('lessons')
@@ -46,10 +41,12 @@ export default async function LessonPage({ params }: Props) {
 
   if (!lesson) notFound()
 
-  if (isQuestionBank) {
-    const firstTask = (lesson.tasks as Array<{ id: string; order: number }>)
-      ?.sort((a, b) => a.order - b.order)[0]
-    if (firstTask) redirect(`/courses/${courseId}/lessons/${lessonId}/tasks/${firstTask.id}`)
+  // Lessons with no content and at least one task have nothing to show on the overview — go straight to the quiz
+  const hasContent = !!(lesson.youtube_url ?? (lesson as { content_url?: string | null }).content_url ?? (lesson as { content_body?: string | null }).content_body ?? (lesson as { image_urls?: string[] }).image_urls?.length)
+  const lessonTasks = (lesson.tasks as Array<{ id: string; order: number }> | null) ?? []
+  if (!hasContent && lessonTasks.length > 0) {
+    const firstTask = [...lessonTasks].sort((a, b) => a.order - b.order)[0]
+    redirect(`/courses/${courseId}/lessons/${lessonId}/tasks/${firstTask.id}`)
   }
 
   const lessonType = (lesson as { lesson_type?: string }).lesson_type ?? 'video'
