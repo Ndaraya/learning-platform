@@ -29,7 +29,7 @@ export default async function TaskPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }] = await Promise.all([
+  const [{ data: task }, { data: lessonTasksData }, { data: lesson }, { data: profile }, { data: courseModules }, { data: course }] = await Promise.all([
     supabase
       .from('tasks')
       .select('id, title, type, instructions, video_url, content_body, image_urls, timed_mode, time_limit_seconds, questions(id, prompt, type, options, points, image_url, author_note)')
@@ -55,7 +55,14 @@ export default async function TaskPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
+    supabase
+      .from('courses')
+      .select('slug')
+      .eq('id', courseId)
+      .single(),
   ])
+
+  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
 
   const ACCOMMODATION_MULTIPLIER: Record<string, number> = {
     standard: 1,
@@ -291,12 +298,14 @@ export default async function TaskPage({ params }: Props) {
           </div>
         ) : (
           <div className="max-w-2xl mx-auto px-8 py-8 space-y-6">
+            {!isQuestionBank && (
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Here is your task</h1>
               {task.instructions && (
                 <p className="mt-2 text-gray-600 text-sm leading-relaxed">{task.instructions}</p>
               )}
             </div>
+          )}
 
             {(task as { video_url?: string | null }).video_url && (
               <VideoEmbed
