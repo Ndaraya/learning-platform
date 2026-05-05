@@ -26,7 +26,7 @@ export default async function LessonPage({ params }: Props) {
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const [{ data: lesson }, { data: courseModules }] = await Promise.all([
+  const [{ data: lesson }, { data: courseModules }, { data: firstTask }] = await Promise.all([
     supabase
       .from('lessons')
       .select('*, tasks(id, title, type, order)')
@@ -37,15 +37,19 @@ export default async function LessonPage({ params }: Props) {
       .select('id, title, section, order, lessons(id, title, order)')
       .eq('course_id', courseId)
       .order('order'),
+    supabase
+      .from('tasks')
+      .select('id, order')
+      .eq('lesson_id', lessonId)
+      .order('order')
+      .limit(1)
+      .maybeSingle(),
   ])
 
   if (!lesson) notFound()
 
-  // Lessons with no content and at least one task have nothing to show on the overview — go straight to the quiz
   const hasContent = !!(lesson.youtube_url ?? (lesson as { content_url?: string | null }).content_url ?? (lesson as { content_body?: string | null }).content_body ?? (lesson as { image_urls?: string[] }).image_urls?.length)
-  const lessonTasks = (lesson.tasks as Array<{ id: string; order: number }> | null) ?? []
-  if (!hasContent && lessonTasks.length > 0) {
-    const firstTask = [...lessonTasks].sort((a, b) => a.order - b.order)[0]
+  if (!hasContent && firstTask) {
     redirect(`/courses/${courseId}/lessons/${lessonId}/tasks/${firstTask.id}`)
   }
 
