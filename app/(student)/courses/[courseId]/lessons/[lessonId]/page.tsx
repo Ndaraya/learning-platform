@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CourseSidebar } from '@/components/student/CourseSidebar'
@@ -19,15 +20,16 @@ export default async function LessonPage({ params }: Props) {
 
   const { data: enrollment } = await supabase
     .from('enrollments')
-    .select('id, courses(slug)')
+    .select('id')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
     .single()
 
   if (!enrollment) redirect(`/courses/${courseId}`)
 
-  const courseSlug = (enrollment as { courses?: { slug?: string } | null })?.courses?.slug ?? ''
-  const isQuestionBank = courseSlug.includes('question-bank')
+  const serviceClient = createServiceClient()
+  const { data: course } = await serviceClient.from('courses').select('slug').eq('id', courseId).single()
+  const isQuestionBank = course?.slug?.includes('question-bank') ?? false
 
   const [{ data: lesson }, { data: courseModules }] = await Promise.all([
     supabase
